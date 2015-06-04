@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<project name="RunInIDE" default="untitled" basedir=".">
+    <target name="untitled">
+        <exec executable="cmd"><arg value="/c"/><arg value="PublishInIDE.bat"/></exec>
+    </target>
+</project>
