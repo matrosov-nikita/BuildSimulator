@@ -27,34 +27,41 @@ public class Building {
     public var sprite: Sprite;
     public var t:TextField;
     public var timer:Timer;
-    public function Building(_x: Number, _y:Number, build_type:String, path:String, scene: Field){
+    public var time:int;
+    public var myFormat:TextFormat;
+
+    public function Building(_x: Number, _y:Number, build_type:String, path:String, scene: Field,time:int){
         this._x = _x;
         this._y = _y;
         this.build_type = build_type;
         this.path = path;
         this.scene = scene;
-        sprite = new Sprite();
-        state="Простаивает";
+        this.time=time;
+        if (time==0) state="Простаивает"; else state="В работе";
         t = new TextField();
-        var myFormat:TextFormat = new TextFormat();
+        myFormat = new TextFormat();
         myFormat.size=7;
         myFormat.font="Georgia";
         t.height=25;
         t.defaultTextFormat=myFormat;
         t.text = state;
         t.selectable=false;
-        t.x = _x*50;
-        t.y=_y*50+40;
-        sprite.addChild(t);
+        sprite = new Sprite();
+
     }
 
     public function Draw():void{
+
         loader = new Loader();
         loader.contentLoaderInfo.addEventListener(Event.INIT, addIntoSprite);
         loader.load(new URLRequest(path));
+        sprite.addChild(t);
     }
 
     private function addIntoSprite(event:Event):void {
+
+        t.x = _x*50;
+        t.y=_y*50+40;
         loader.x = _x*50;
         loader.y = _y*50;
         loader.width = 50;
@@ -64,8 +71,13 @@ public class Building {
         scene.field_sprite.addChild(sprite);
     }
     public function Redraw():void {
-        trace(state);
-        t.text = state+((timer!=null && state=="В работе")?("\n" + timer.currentCount.toString()):"");
+
+        var k:int  = timer.repeatCount;
+        var l:int = timer.currentCount;
+        var diff:int = k-l;
+        var minutes:int = diff/60;
+        var seconds:int = diff%60;
+        t.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
 
 }

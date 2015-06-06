@@ -10,77 +10,104 @@ import flash.utils.Timer;
 
 public class Factory extends Building {
     private var contract:int;
-    var myFormat:TextFormat = new TextFormat();
+
     var contract1:MyButton;
     var contract2:MyButton;
     var contract_sprite:Sprite;
-    public function Factory(_x:Number, _y:Number, build_type:String, path:String, scene:Field, contract:int) {
-        super(_x, _y, build_type, path, scene);
+    public function Factory(_x:Number, _y:Number, build_type:String, path:String, scene:Field, contract:int,time:int) {
+        super(_x, _y, build_type, path, scene,time);
         this.contract = contract;
-        sprite.addEventListener(MouseEvent.CLICK,chooseContract);
-        myFormat.size = 7;
-        myFormat.font = "Georgia";
-       timer = new Timer(1000);
+      if (this.contract==0) {
+          sprite.addEventListener(MouseEvent.CLICK, chooseContract);
+      }
+         timer = new Timer(1000);
+        if (state=="В работе") {
+            var time_to_complete:int = ((contract==1)?300000:900000);
+            timer.repeatCount = Math.floor((time_to_complete-time)/1000);
+            timer.start();
+        }
         timer.addEventListener(TimerEvent.TIMER, tick);
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
-         contract1 = new MyButton(_x * 50, _y * 50, 20, 10, "K1", myFormat);
-         contract2 = new MyButton(_x * 50 + 21, _y * 50, 20, 10, "K2", myFormat);
+
         contract_sprite = new Sprite();
     }
 
     private function ready(event:TimerEvent):void {
-        trace("The end!");
         state="Готов к сбору";
         Redraw();
         sprite.addEventListener(MouseEvent.CLICK, getProfit);
+        sprite.removeEventListener(MouseEvent.CLICK, chooseContract);
         sprite.buttonMode=true;
     }
 
     private function getProfit(event:MouseEvent):void {
-        if (contract == 1) {
-            scene.coins+=30;
+        trace(Global.userOperation);
+        if (Global.userOperation==false) {
+            if (contract == 1) {
+                Global.coins.text = "Coins: " + (scene.coins+=30).toString();
+
+            }
+            else {
+                Global.coins.text = "Coins: " + (scene.coins+=50).toString();
+
+            }
+            sprite.removeEventListener(MouseEvent.CLICK, getProfit);
+            sprite.removeChild(contract_sprite);
+            state = "Простаивает";
+            timer.reset();
+            time=0;
+            Redraw();
+            sprite.buttonMode = false;
+            contract = 0;
+            sprite.addEventListener(MouseEvent.CLICK, chooseContract);
         }
-        else {
-            scene.coins+=50;
+        Global.userOperation = false;
+        if (!sprite.hasEventListener(MouseEvent.CLICK) )
+        {
+            sprite.addEventListener(MouseEvent.CLICK,getProfit);
         }
-        sprite.removeEventListener(MouseEvent.CLICK, getProfit);
-         sprite.removeChild(contract_sprite);
-        state="Простаивает";
-        timer.reset();
-        Redraw();
-        sprite.buttonMode=false;
-        contract=0;
-        //sprite.addEventListener(MouseEvent.CLICK,chooseContract);
-        trace(sprite.hasEventListener(MouseEvent.CLICK));
-        trace(scene.coins);
     }
     private function tick(event:TimerEvent):void {
         Redraw();
-        trace("contract is running");
     }
 
 
-
     private function chooseContract(event:MouseEvent):void {
-
-        if (contract==0) {
+        trace(sprite.hasEventListener(MouseEvent.CLICK));
+        if (contract==0 && Global.userOperation==false) {
+            contract1 = new MyButton(_x * 50, _y * 50, 20, 10, "K1", myFormat);
+            contract2 = new MyButton(_x * 50 + 21, _y * 50, 20, 10, "K2", myFormat);
             contract1.addEventListener(MouseEvent.CLICK, chooseContract1);
             contract2.addEventListener(MouseEvent.CLICK, chooseContract2);
             sprite.addChild(contract1);
             sprite.addChild(contract2);
+        }
+        Global.userOperation=false;
+        if (!sprite.hasEventListener(MouseEvent.CLICK) )
+        {
+            sprite.addEventListener(MouseEvent.CLICK,chooseContract);
         }
     }
 
 
 
     private function chooseContract1(event:MouseEvent):void {
-        timer.repeatCount = 15;
-        startContract(5,1,"contract_1.png");
+
+        if (scene.coins>=5) {
+            Global.coins.text = "Coins: " + (scene.coins-=5).toString();
+            timer.repeatCount = 300;
+            startContract(5, 1, "contract_1.png");
+        }
+
     }
     private function chooseContract2(event:MouseEvent):void {
 
-        timer.repeatCount = 25;
-        startContract(10,2,"contract_2.png");
+        if (scene.coins>=10) {
+            Global.coins.text = "Coins: " + (scene.coins-=10).toString();
+            timer.repeatCount = 900;
+            startContract(10, 2, "contract_2.png");
+        }
+
     }
     private function  startContract(coins:int, number:int,picture:String):void {
         if (scene.coins>=coins) {
@@ -100,10 +127,12 @@ public class Factory extends Building {
     public override  function  Draw():void {
 
         if (contract==1) {
-            sprite.addChild(new Viewer("contract_1.png",_x*50, _y*50,20,20));
+            contract_sprite = new Viewer("contract_1.png",_x*50, _y*50,20,20);
+            sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            sprite.addChild(new Viewer("contract_2.png",_x*50, _y*50,20,20));
+            contract_sprite = new Viewer("contract_2.png",_x*50, _y*50,20,20);
+            sprite.addChild(contract_sprite);
         }
         super.Draw();
     }

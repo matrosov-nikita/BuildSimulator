@@ -26,17 +26,18 @@ public class Field {
             var x:int = child.@x;
 
             var y:int = child.@y;
+            var time:int = child.@time;
             if (child.name() == "auto_workshop") {
-                buildings.push(new Workship(x,y,"auto_workshop","auto_workshop.png",this));
+                buildings.push(new Workship(x,y,"auto_workshop","auto_workshop.png",this,time));
             }
             else {
-                buildings.push(new Factory(x,y,"factory","factory.png",this,child.@contract));
+                buildings.push(new Factory(x,y,"factory","factory.png",this,child.@contract,time));
             }
         }
     }
     public function draw():void{
         for(var i:int = 0; i < buildings.length; ++i) {
-            trace(buildings[i],buildings[i]._x, buildings[i]._y );
+            trace(buildings[i]._x, buildings[i]._y );
 
             buildings[i].Draw();
         }
@@ -53,11 +54,11 @@ public class Field {
         if (!exist) {
             var create_object:Building;
             if (type=="auto_workshop") {
-                create_object = new Workship(x,y,"auto_workshop","auto_workshop.png",this);
+                create_object = new Workship(x,y,"auto_workshop","auto_workshop.png",this,0);
                 buildings.push(create_object);
             }
             else {
-                create_object = new Factory(x,y,"factory","factory.png",this,0)
+                create_object = new Factory(x,y,"factory","factory.png",this,0,0)
                 buildings.push(create_object);
             }
 

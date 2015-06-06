@@ -2,12 +2,13 @@
  * Created by Пользователь on 01.06.2015.
  */
 package {
+import flash.display.SimpleButton;
 import flash.display.Sprite;
 import flash.display.Graphics;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
-public class MyButton  extends Sprite{
+public class MyButton  extends SimpleButton{
     private var button:Sprite;
     public var text:TextField;
 
@@ -18,6 +19,9 @@ public class MyButton  extends Sprite{
         this.text.text = _text;
         text.x = _x;
         text.y = _y;
+        text.height=height;
+        text.width=width;
+        button.graphics.lineStyle(1, 0x555555);
         button.addChild(text);
         button.graphics.beginFill(0xFFCC00);
         button.graphics.drawRect(_x,_y,width,height);
@@ -25,7 +29,7 @@ public class MyButton  extends Sprite{
         button.buttonMode=true;
         button.useHandCursor=true;
         button.mouseChildren=false;
-        this.addChild(button);
+        this.overState = this.downState = this.upState = this.hitTestState = button;
     }
 }
 }
