@@ -53,6 +53,7 @@ public class Factory extends Building {
             }
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
             sprite.removeChild(contract_sprite);
+            contract_sprite = new Sprite();
             state = "Простаивает";
             timer.reset();
             time=0;
@@ -110,16 +111,18 @@ public class Factory extends Building {
 
     }
     private function  startContract(coins:int, number:int,picture:String):void {
-        if (scene.coins>=coins) {
+
             contract = number;
 
-            if (sprite.contains(contract1)) sprite.removeChild(contract1);
-            if (sprite.contains(contract2)) sprite.removeChild(contract2);
-            contract_sprite.addChild(new Viewer(picture, _x * 50, _y * 50, 20, 20));
+            if (sprite.contains(contract1))
+                sprite.removeChild(contract1);
+            if (sprite.contains(contract2))
+                sprite.removeChild(contract2);
+            contract_sprite.addChild(new Viewer(picture, _x * 50, _y * 50, 15, 15));
             sprite.addChild(contract_sprite);
             state = "В работе";
             timer.start();
-        }
+
     }
 
 
@@ -127,11 +130,11 @@ public class Factory extends Building {
     public override  function  Draw():void {
 
         if (contract==1) {
-            contract_sprite = new Viewer("contract_1.png",_x*50, _y*50,20,20);
+            contract_sprite = new Viewer("contract_1.png",_x*50, _y*50,15,15);
             sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            contract_sprite = new Viewer("contract_2.png",_x*50, _y*50,20,20);
+            contract_sprite = new Viewer("contract_2.png",_x*50, _y*50,15,15);
             sprite.addChild(contract_sprite);
         }
         super.Draw();

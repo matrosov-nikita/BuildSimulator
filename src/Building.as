@@ -61,11 +61,11 @@ public class Building {
     private function addIntoSprite(event:Event):void {
 
         t.x = _x*50;
-        t.y=_y*50+40;
+        t.y=_y*50+30;
         loader.x = _x*50;
         loader.y = _y*50;
-        loader.width = 50;
-        loader.height=50;
+        loader.width = 40;
+        loader.height=40;
         t.text = state;
         sprite.addChild(loader);
         scene.field_sprite.addChild(sprite);

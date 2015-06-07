@@ -11,13 +11,15 @@ public class Field {
     public var buildings:Array;
     public var coins:int;
     public var field_sprite:Sprite;
+    public const field_width:int = 550;
+    public const field_height:int = 350;
     public function Field(info:XML,scene:Sprite) {
         coins = 70;
         buildings = new Array();
 
         field_sprite = new Sprite();
 
-        field_sprite.addChild(new Viewer("field.jpg", 0, 0, 500, 300));
+        field_sprite.addChild(new Viewer("field.jpg", 0, 0, field_width, field_height));
 
 
         scene.addChild(field_sprite);

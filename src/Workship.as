@@ -12,7 +12,7 @@ import flash.utils.setInterval;
 
 public class Workship extends Building {
 
-    var profit:int;
+
 
     public function Workship(_x:Number, _y:Number, build_type:String, path:String, scene:Field,time:int) {
     super(_x, _y, build_type, path, scene,time);
@@ -20,7 +20,6 @@ public class Workship extends Building {
         timer= new Timer(1000);
         timer.repeatCount = Math.floor((300000-time)/1000);
         state="В работе";
-         profit =  0;
         timer.start();
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
         timer.addEventListener(TimerEvent.TIMER, tick);
