@@ -126,6 +126,10 @@ public class ButtonsMenu {
         }
     }
 
+    private function loLoad(event:Event):void {
+        trace("cascawq");
+    }
+
 //------------------------------------------------------------------------
 
 
@@ -153,6 +157,9 @@ public class ButtonsMenu {
         var _x:int = event.target.x/50;
         var _y:int =  event.target.y/50;
         var search_index:int = field.find_building(_x, _y);
+
+
+
         event.currentTarget.stopDrag();
 
         for(var i:int = 0; i < field.buildings.length; i++) {
