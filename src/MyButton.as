@@ -1,7 +1,8 @@
 /**
- * Created by Пользователь on 01.06.2015.
+ * Created by пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ on 01.06.2015.
  */
 package {
+import flash.display.Shape;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
 import flash.display.Graphics;
@@ -9,11 +10,33 @@ import flash.text.TextField;
 import flash.text.TextFormat;
 
 public class MyButton  extends SimpleButton{
-    private var button:Sprite;
-    public var text:TextField;
 
-    public function MyButton(_x:int, _y:int, width:int, height:int,_text:String,textFormat:TextFormat=null) {
-        button  = new Sprite();
+
+    private var upColor:uint   = 0xFFCC00;
+    private var overColor:uint = 0xCCFF00;
+    private var downColor:uint = 0x00CCFF;
+    public function MyButton(_x:int, _y:int, width:int, height:int,_text:String,textFormat:TextFormat) {
+
+
+      overState = new ButtonDisplayState(_x, _y, width, height, _text, textFormat, overColor);
+      downState =  new ButtonDisplayState(_x, _y, width, height, _text, textFormat, downColor);
+      upState =  new ButtonDisplayState(_x, _y, width, height, _text, textFormat, upColor);
+        hitTestState = new ButtonDisplayState(_x, _y, width, height, _text, textFormat, upColor);
+    }
+
+}
+
+}
+
+import flash.display.Shape;
+import flash.display.Sprite;
+import flash.text.TextField;
+import flash.text.TextFormat;
+
+class ButtonDisplayState extends Sprite {
+    private var bgColor:uint;
+    private var text:TextField;
+    public function ButtonDisplayState(_x:int, _y:int, width:int, height:int,_text:String,textFormat:TextFormat,bgColor:uint) {
         text = new TextField();
         text.defaultTextFormat = textFormat;
         this.text.text = _text;
@@ -21,15 +44,12 @@ public class MyButton  extends SimpleButton{
         text.y = _y;
         text.height=height;
         text.width=width;
-        button.graphics.lineStyle(1, 0x555555);
-        button.addChild(text);
-        button.graphics.beginFill(0xFFCC00);
-        button.graphics.drawRect(_x,_y,width,height);
-        button.graphics.endFill();
-        button.buttonMode=true;
-        button.useHandCursor=true;
-        button.mouseChildren=false;
-        this.overState = this.downState = this.upState = this.hitTestState = button;
+        this.bgColor = bgColor;
+        buttonMode=true;
+        addChild(text);
+        graphics.lineStyle(1, 0x555555);
+        graphics.beginFill(bgColor);
+        graphics.drawRect(_x, _y, width, height);
+        graphics.endFill();
     }
-}
 }

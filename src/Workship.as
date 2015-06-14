@@ -18,9 +18,14 @@ public class Workship extends Building {
     super(_x, _y, build_type, path, scene,time);
 
         timer= new Timer(1000);
-        timer.repeatCount = Math.floor((300000-time)/1000);
-        state="В работе";
-        timer.start();
+
+        var repCount:int = Math.floor((300000 - time) / 1000);
+        if (repCount==0) ready();
+        else {
+            timer.repeatCount =repCount;
+            state = "В работе";
+            timer.start();
+        }
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
         timer.addEventListener(TimerEvent.TIMER, tick);
 
@@ -32,7 +37,7 @@ public class Workship extends Building {
         //trace(timer.currentCount);
     }
 
-    private function ready(event:TimerEvent):void {
+    private function ready(event:TimerEvent=null):void {
 
         state = "Готов к сбору";
         Redraw();
@@ -43,20 +48,25 @@ public class Workship extends Building {
 
     private function getProfit(event:MouseEvent):void {
         if (Global.userOperation==false) {
+            trace("gO");
             Global.coins.text = "Coins: " + (scene.coins+=10).toString();
 
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
-            state = "В работе";
-            Redraw();
+
+            time=0;
             timer.reset();
-            timer.repeatCount = 300;
-            timer.start();
+            socket.send(scene.convert_to_xml()+"\n");
+
+//            Redraw();
+//            timer.reset();
+//            timer.repeatCount = 300;
+//            timer.start();
         }
         Global.userOperation=false;
-        if (!sprite.hasEventListener(MouseEvent.CLICK) )
-        {
-            sprite.addEventListener(MouseEvent.CLICK,getProfit);
-        }
+//        if (!sprite.hasEventListener(MouseEvent.CLICK) )
+//        {
+//            sprite.addEventListener(MouseEvent.CLICK,getProfit);
+//        }
 
     }
 

@@ -8,9 +8,13 @@ import flash.display.Loader;
 
 
 import flash.display.Sprite;
+import flash.events.DataEvent;
 import flash.events.Event;
+import flash.events.IEventDispatcher;
 
 import flash.net.URLRequest;
+import flash.net.XMLSocket;
+import flash.system.Security;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.Timer;
@@ -29,7 +33,7 @@ public class Building {
     public var timer:Timer;
     public var time:int;
     public var myFormat:TextFormat;
-
+    public var socket:XMLSocket;
     public function Building(_x: Number, _y:Number, build_type:String, path:String, scene: Field,time:int){
         this._x = _x;
         this._y = _y;
@@ -47,7 +51,22 @@ public class Building {
         t.text = state;
         t.selectable=false;
         sprite = new Sprite();
+        Security.loadPolicyFile('xmlsocket://localhost:8080');
+        socket = new XMLSocket();
+        configureListeners(socket);
+        socket.connect('localhost', 8080);
 
+    }
+
+    private function configureListeners(dispatcher:IEventDispatcher):void {
+        dispatcher.addEventListener(DataEvent.DATA, getData);
+
+    }
+
+    private function getData(event:DataEvent):void {
+        var xml:XML = XML(event.data);
+        if (xml.name()=="field")
+            scene.draw(xml);
     }
 
     public function Draw():void{
@@ -79,6 +98,8 @@ public class Building {
         var seconds:int = diff%60;
         t.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
+
+
 
 }
 }
