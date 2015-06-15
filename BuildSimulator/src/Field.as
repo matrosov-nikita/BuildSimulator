@@ -14,7 +14,7 @@ public class Field {
     public const field_width:int = 550;
     public const field_height:int = 350;
     public function Field(scene:Sprite) {
-        coins = 700;
+        coins = 70;
         buildings = new Array();
         field_sprite = new Sprite();
         field_sprite.addChild(new Viewer("field.jpg", 0, 0, field_width, field_height));
@@ -82,7 +82,7 @@ public class Field {
         return -1;
     }
     public function convert_to_xml():XML {
-        var buidling:XML = <field/>;
+        var buidling:XML = <field coins={coins}/>;
 
         for(var i:int = 0; i < buildings.length; ++i)
         {

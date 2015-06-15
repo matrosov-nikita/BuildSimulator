@@ -1,5 +1,5 @@
 /**
- * Created by Пользователь on 06.06.2015.
+ * Created by пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ on 06.06.2015.
  */
 package {
 import flash.text.TextField;

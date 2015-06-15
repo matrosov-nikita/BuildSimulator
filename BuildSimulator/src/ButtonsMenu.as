@@ -45,6 +45,11 @@ public class ButtonsMenu {
         btnMove = new MyButton(this.field.field_width+10,button_height,button_width,button_height, "Move",myformat);
         btnSell = new MyButton(this.field.field_width+10,2*button_height,button_width,button_height, "Remove",myformat);
         btnSave = new MyButton(this.field.field_width+10,3*button_height,button_width,button_height, "Save",myformat);
+        Global.coins.x = this.field.field_width+10;
+        Global.coins.y = field.field_height;
+        Global.coins.border=true;
+        Global.coins.borderColor=0xCCFF00;
+        Global.coins.height = button_height;
         stage.addChild (btnAddShop);
         stage.addChild(btnAddFactory);
         stage.addChild(btnMove);
@@ -98,8 +103,9 @@ public class ButtonsMenu {
         var y:int = Math.floor(stage.mouseY/50);
         if (field.addNewBuilding(x,y,"factory")==0)
         {
-            socket.send(field.convert_to_xml()+"\n");
             Global.coins.text = "Coins: " + (field.coins-=factory_cost).toString();
+            socket.send(field.convert_to_xml()+"\n");
+
             //socket.send("addBuilding\n");
 
             field.field_sprite.buttonMode=false;
@@ -117,8 +123,9 @@ public class ButtonsMenu {
         var y:int = Math.floor(stage.mouseY/50);
         if (field.addNewBuilding(x,y,"auto_workshop")==0)
         {
-            socket.send(field.convert_to_xml()+"\n");
+
             Global.coins.text = "Coins: " + (field.coins-=shop_cost).toString();
+            socket.send(field.convert_to_xml()+"\n");
             field.field_sprite.removeEventListener(MouseEvent.CLICK, addShop);
             Global.userOperation=false;
             Mouse.show();

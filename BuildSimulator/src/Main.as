@@ -27,7 +27,7 @@ public class Main extends  Sprite{
         var menu:ButtonsMenu = new ButtonsMenu(field,stage);
 
         Global.coins.text = field.coins.toString();
-        Global.coins.x = 700;
+
         Global.coins.text = "Coins: " + field.coins;
         Global.coins.selectable=false;
         addChild( Global.coins);

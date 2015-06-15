@@ -48,7 +48,7 @@ public class Workship extends Building {
 
     private function getProfit(event:MouseEvent):void {
         if (Global.userOperation==false) {
-            trace("gO");
+
             Global.coins.text = "Coins: " + (scene.coins+=10).toString();
 
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
