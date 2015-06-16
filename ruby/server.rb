@@ -1,34 +1,46 @@
-require 'rubygems'
-require 'eventmachine'
-
+#!/usr/bin/env ruby
+require 'webrick'
 require_relative 'database'
+
 @@conn = Database.new
-  class EchoServer < EventMachine::Connection
 
-    def post_init
-      puts "Connection with server"
-      policyInfo = '<?xml version="1.0"?>'
-      policyInfo += '<cross-domain-policy>'
-      policyInfo += '<allow-access-from domain="*" to-ports="8080" />'
-      policyInfo += "</cross-domain-policy>\0"
-      send_data policyInfo
-    end
+$policyInfo = '<?xml version="1.0"?>'
+$policyInfo += '<cross-domain-policy>'
+$policyInfo += '<allow-access-from domain="*" to-ports="8080" />'
+$policyInfo += "</cross-domain-policy>\0"
 
-    def receive_data data
+class MyServlet < WEBrick::HTTPServlet::AbstractServlet
 
-    data=data.strip if data
-
-     send_data (@@conn.saveBuilding(data) + "\0")
-
-    end
-
-    def unbind
-      puts "Connection is closed"
-    end
-  end
-
-  EventMachine::run {
-
+  def do_GET (request, response)
     @@conn.connect
-    EventMachine::start_server 'localhost', 8080, EchoServer
-  }
+
+
+    if request.query["xml"]
+    xml = request.query["xml"]
+    response.status = 200
+     response.content_type = "text/xml"
+     response.body =  @@conn.saveBuilding(xml).to_s + "\n"
+    else
+
+      response.status = 200
+      if (request.path=="/crossdomain.xml")
+        puts "GO GO GO"
+        puts request.path
+        response.content_type = "text/xml"
+        response.body = $policyInfo + "\n"
+      else
+    response.body = File.new(request.path[1,request.path.size-1])
+      end
+      end
+  end
+end
+
+server = WEBrick::HTTPServer.new(:Port => 8090)
+
+server.mount "/", MyServlet
+
+trap("INT") {
+  server.shutdown
+}
+
+server.start

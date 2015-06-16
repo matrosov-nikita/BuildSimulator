@@ -1,11 +1,7 @@
-
 package {
 import flash.display.SimpleButton;
 import flash.text.TextFormat;
-
 public class MyButton  extends SimpleButton{
-
-
     private var upColor:uint   = 0xFFCC00;
     private var overColor:uint = 0xCCFF00;
     private var downColor:uint = 0x00CCFF;
@@ -20,7 +16,6 @@ public class MyButton  extends SimpleButton{
 import flash.display.Sprite;
 import flash.text.TextField;
 import flash.text.TextFormat;
-
 class ButtonDisplayState extends Sprite {
     private var bgColor:uint;
     private var text:TextField;

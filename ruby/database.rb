@@ -18,6 +18,7 @@ end
     reset_building_seq
   xml_doc = Nokogiri::XML(xmlStr)
   xml_doc.xpath("//field").map { |child|
+    puts child
     @conn.exec("insert into fields(coins)
                  values(#{child["coins"]});")
    child.children.map { |n|
@@ -111,8 +112,10 @@ def reset_building_seq
 end
 
  def drop_table
+   puts "drop building"
    @conn.exec("DROP TABLE buildings;")
-   @conn.exec("drop table fields")
+   puts "drop fields"
+   @conn.exec("drop table fields;")
  end
 
   def disconnet

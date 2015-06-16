@@ -2,104 +2,72 @@
  * Created by nik on 21.05.15.
  */
 package {
-
-
 import flash.display.Loader;
-
-
 import flash.display.Sprite;
 import flash.events.DataEvent;
 import flash.events.Event;
 import flash.events.IEventDispatcher;
-
 import flash.net.URLRequest;
 import flash.net.XMLSocket;
 import flash.system.Security;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.Timer;
-
-
 public class Building {
     public var _x:int;
     public var _y:int;
-    public var build_type:String;
-    public var path:String;
     public var state:String;
     public var scene: Field;
     public var loader:Loader;
     public var sprite: Sprite;
-    public var t:TextField;
     public var timer:Timer;
     public var time:int;
-    public var myFormat:TextFormat;
-    public var socket:XMLSocket;
-    public function Building(_x: Number, _y:Number, build_type:String, path:String, scene: Field,time:int){
+    public var t_state:TextField;
+    public var path:String;
+    public var build_type:String;
+    public function Building(_x: Number, _y:Number, scene: Field,time:int){
         this._x = _x;
         this._y = _y;
-        this.build_type = build_type;
-        this.path = path;
         this.scene = scene;
         this.time=time;
         if (time==0) state="Простаивает"; else state="В работе";
-        t = new TextField();
-        myFormat = new TextFormat();
-        myFormat.size=7;
-        myFormat.font="Georgia";
-        t.height=25;
-        t.defaultTextFormat=myFormat;
-        t.text = state;
-        t.selectable=false;
         sprite = new Sprite();
-        Security.loadPolicyFile('xmlsocket://localhost:8080');
-        socket = new XMLSocket();
-        configureListeners(socket);
-        socket.connect('localhost', 8080);
-
-    }
-
-    private function configureListeners(dispatcher:IEventDispatcher):void {
-        dispatcher.addEventListener(DataEvent.DATA, getData);
-
-    }
-
-    private function getData(event:DataEvent):void {
-        var xml:XML = XML(event.data);
-        if (xml.name()=="field")
-            scene.draw(xml);
+        t_state = new TextField();
     }
 
     public function Draw():void{
-
         loader = new Loader();
-        loader.contentLoaderInfo.addEventListener(Event.INIT, addIntoSprite);
+        loader.contentLoaderInfo.addEventListener(Event.INIT, onLoad);
         loader.load(new URLRequest(path));
-        sprite.addChild(t);
     }
 
-    private function addIntoSprite(event:Event):void {
+    private function onLoad(event:Event):void {
 
-        t.x = _x*50;
-        t.y=_y*50+30;
+        var myFormat = new TextFormat("Georgia",7);
+        t_state.height=25;
+        t_state.defaultTextFormat=myFormat;
+        t_state.text = state;
+        t_state.selectable=false;
+        t_state.x = _x*50;
+        t_state.y=_y*50+30;
+        sprite.addChild(t_state);
         loader.x = _x*50;
         loader.y = _y*50;
         loader.width = 40;
         loader.height=40;
-        t.text = state;
+        t_state.text = state;
         sprite.addChild(loader);
         scene.field_sprite.addChild(sprite);
     }
-    public function Redraw():void {
 
+    public function Redraw():void {
         var k:int  = timer.repeatCount;
         var l:int = timer.currentCount;
         var diff:int = k-l;
         var minutes:int = diff/60;
         var seconds:int = diff%60;
-        t.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
+        trace(t_state);
+        t_state.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
-
-
-
 }
 }
