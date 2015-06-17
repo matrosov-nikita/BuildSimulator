@@ -7,7 +7,6 @@ import flash.geom.Rectangle;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
 import flash.net.URLVariables;
-import flash.net.XMLSocket;
 import flash.system.Security;
 import flash.text.TextFormat;
 import flash.ui.Mouse;
@@ -86,6 +85,7 @@ public class ButtonsMenu {
             Global.userOperation=false;
             Mouse.show();
         }
+        sendRequest();
     }
 
 
@@ -132,6 +132,7 @@ public class ButtonsMenu {
         field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP,up);
         field.buildings[search_index]._x = Math.floor(stage.mouseX/50);
         field.buildings[search_index]._y=Math.floor(stage.mouseY/50);
+        sendRequest();
     }
 
     private function btn4Listener(event:MouseEvent):void {
@@ -154,11 +155,12 @@ public class ButtonsMenu {
             for(var i:int = 0; i < field.buildings.length; i++) {
                 field.buildings[i].sprite.removeEventListener(MouseEvent.CLICK, removeBuilding);
             }
+            sendRequest();
         }
     }
 
     private function sendRequest():void {
-        Security.loadPolicyFile('http://localhost:8090/crossdomain.xml');
+       // Security.loadPolicyFile('http://localhost:8090/crossdomain.xml');
         var url:String = 'http://localhost:8090/';
         var request:URLRequest = new URLRequest(url);
         var variables:URLVariables = new URLVariables();
@@ -168,7 +170,6 @@ public class ButtonsMenu {
         var loader:URLLoader = new URLLoader();
         loader.load(request);
         loader.addEventListener(Event.COMPLETE, function onComplete() {
-            trace("res: " + loader.data);
             var xml:XML = XML(loader.data);
             if (xml.name()=="field")
                 field.drawField(xml);
@@ -176,7 +177,7 @@ public class ButtonsMenu {
 
     }
     private function btn5Listener(event:MouseEvent):void {
-
+        sendRequest();
     }
 }
 }

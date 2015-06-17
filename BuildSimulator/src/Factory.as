@@ -60,6 +60,7 @@ public class Factory extends Building {
             timer.reset();
             time=0;
             contract = 0;
+            sendRequest();
         }
         Global.userOperation = false;
     }
@@ -100,6 +101,7 @@ public class Factory extends Building {
     }
     private function  startContract( number:int):void {
             contract = number;
+        sendRequest();
     }
 
     public override  function  Draw():void {

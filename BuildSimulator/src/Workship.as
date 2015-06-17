@@ -38,6 +38,7 @@ public class Workship extends Building {
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
             time=0;
             timer.reset();
+            sendRequest();
         }
         Global.userOperation=false;
     }

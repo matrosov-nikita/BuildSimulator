@@ -2,12 +2,16 @@
  * Created by nik on 21.05.15.
  */
 package {
+
 import flash.display.Loader;
 import flash.display.Sprite;
 import flash.events.DataEvent;
 import flash.events.Event;
 import flash.events.IEventDispatcher;
+import flash.events.MouseEvent;
+import flash.net.URLLoader;
 import flash.net.URLRequest;
+import flash.net.URLVariables;
 import flash.net.XMLSocket;
 import flash.system.Security;
 import flash.text.TextField;
@@ -33,6 +37,11 @@ public class Building {
         if (time==0) state="Простаивает"; else state="В работе";
         sprite = new Sprite();
         t_state = new TextField();
+        sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
+    }
+
+    private function onMove(event:MouseEvent):void {
+        sprite.buttonMode=true;
     }
 
     public function Draw():void{
@@ -66,8 +75,26 @@ public class Building {
         var diff:int = k-l;
         var minutes:int = diff/60;
         var seconds:int = diff%60;
-        trace(t_state);
+
         t_state.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
+    }
+
+    public function sendRequest():void {
+        // Security.loadPolicyFile('http://localhost:8090/crossdomain.xml');
+        var url:String = 'http://localhost:8090/';
+        var request:URLRequest = new URLRequest(url);
+        var variables:URLVariables = new URLVariables();
+        variables.xml =scene.convertToXML();
+        request.data = variables;
+        request.contentType="text/xml";
+        var loader:URLLoader = new URLLoader();
+        loader.load(request);
+        loader.addEventListener(Event.COMPLETE, function onComplete() {
+            var xml:XML = XML(loader.data);
+            if (xml.name()=="field")
+                scene.drawField(xml);
+        });
+
     }
 }
 }

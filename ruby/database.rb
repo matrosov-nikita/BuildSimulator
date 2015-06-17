@@ -41,22 +41,6 @@ end
   generate_xml_by_table
   end
 
-  # def removeBuilding xmlStr
-  #   xml_doc = Nokogiri::XML(xmlStr)
-  #   xml_doc.xpath("//field").map { |child|
-  #     child.children.map { |n|
-  #       if n.elem?
-  #         x = n["x"]
-  #         y = n["y"]
-  #         time = n["time"]
-  #         contract =n["contract"]
-  #         @conn.exec("delete from buildings where x=#{x} and y=#{y}")
-  #       end
-  #     }
-  #   }
-  #   generate_xml_by_table
-  # end
-
 
 def generate_xml_by_table
 
