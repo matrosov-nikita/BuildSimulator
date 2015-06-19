@@ -2,22 +2,26 @@
  * Created by nik on 22.05.15.
  */
 package {
+
+
 import flash.display.Sprite;
+import flash.display.Stage;
+
 public class Field {
     public const field_width:int = 550;
     public const field_height:int = 350;
-    public const start_coins = 70;
+    public const start_coins = 700;
     public const path = "http://localhost:8090/images/field.jpg";
     public var buildings:Array;
     public var coins:int;
     public var field_sprite:Sprite;
 
-    public function Field(scene:Sprite) {
+    public function Field(stage:Stage) {
         coins = start_coins;
         buildings = new Array();
         field_sprite = new Sprite();
         field_sprite.addChild(new Viewer(path,0, 0, field_width, field_height));
-        scene.addChild(field_sprite);
+        stage.addChild(field_sprite);
     }
 
     public function removeAllBuildings():void {
@@ -34,40 +38,52 @@ public class Field {
     }
 
     public function drawField(info:XML):void{
-        removeAllBuildings();
+
+        var find:Boolean = false;
+
         if (info != null) {
+           // removeAllBuildings();
             coins = info.@coins;
             for each(var child:XML in info.*) {
-                var x:int = child.@x;
-                var y:int = child.@y;
-                var time:int = child.@time;
-                if (child.name() == "auto_workshop") {
-                    buildings.push(new Workship(x, y, this, time));
+                var id:int = child.@id;
+                if (id == Global.currentBuilding)
+                {
+                    var x:int = child.@x;
+                    var y:int = child.@y;
+                    var time:int = child.@time;
+                    var contract:int = child.@contract;
+                    var index:int = findBuildingById(id);
+                    if (index!=-1)
+                    {
+                        field_sprite.removeChild(buildings[index].sprite);
+                        buildings[index]=null;
+                        if (child.name() == "auto_workshop") {
+                            buildings[index] = new Workship(id,x, y, this, time);
+                        }
+                        else {
+                            buildings[index] =  new Factory(id,x, y, this, contract, time);
+                        }
+                        buildings[index].Draw();
+                    }
+                    else {
+                        if (child.name() == "auto_workshop") {
+                            buildings.push(new Workship(id,x, y, this, time));
+                        }
+                        else {
+                            buildings.push(new Factory(id,x, y, this, contract, time));
+                        }
+                        buildings[buildings.length-1].Draw();
+                    }
+                    find = true; break;
                 }
-                else {
-                    buildings.push(new Factory(x, y, this, child.@contract, time));
-                }
+            }
+           if (find==false) {
+                var r_index:Number = findBuildingById(Global.currentBuilding);
+                field_sprite.removeChild(buildings[r_index].sprite);
+               buildings.slice(r_index,1);
             }
         }
-        drawAllBuildings();
-    }
-
-    public function addNewBuilding(x,y,type):int
-    {
-        var exist:int = find_building(x,y);
-        if (exist==-1) {
-            var create_object:Building;
-            if (type=="auto_workshop") {
-                create_object = new Workship(x,y,this,0);
-                buildings.push(create_object);
-            }
-            else {
-                create_object = new Factory(x,y,this,0,0);
-                buildings.push(create_object);
-            }
-            return 0;
-        }
-        return 1;
+      //  drawAllBuildings();
     }
 
     public function find_building(x:int, y:int):int
@@ -81,15 +97,27 @@ public class Field {
         }
         return -1;
     }
+    public function findBuildingById(id:int) {
+        for(var i:int = 0; i < buildings.length; ++i)
+        {
+            if (buildings[i].id==id)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public function convertToXML():XML {
-        var buidling:XML = <field coins={coins}/>;
+        var buidling:XML = <field coins={coins}> </field>;
+
         for(var i:int = 0; i < buildings.length; ++i)
         {
             var build:Building = buildings[i];
             if (build.build_type=="factory")
             {
                 buidling.appendChild(<{build.build_type}
+                        id={build.id}
                         x = {build._x}
                         y = {build._y}
                         contract={(build as Factory).contract}
@@ -98,17 +126,14 @@ public class Field {
             else
             {
                 buidling.appendChild(<{build.build_type}
+                        id={build.id}
                         x = {build._x}
                         y = {build._y}
                         time={build.time + build.timer.currentCount*1000} />);
             }
         }
-        return buidling;
-    }
 
-    public function remove_building(index:int):void
-    {
-        buildings.splice(index,1);
+        return buidling;
     }
 }
 }

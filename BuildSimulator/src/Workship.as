@@ -4,10 +4,11 @@
 package {
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
+import flash.net.URLVariables;
 import flash.utils.Timer;
 public class Workship extends Building {
-    public function Workship(_x:Number, _y:Number, scene:Field,time:int) {
-    super(_x, _y, scene,time);
+    public function Workship(id:Number,_x:Number, _y:Number, scene:Field,time:int) {
+    super(id,_x, _y, scene,time);
         path="http://localhost:8090/images/auto_workshop.png";
         build_type="auto_workshop";
         timer= new Timer(1000);
@@ -38,7 +39,10 @@ public class Workship extends Building {
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
             time=0;
             timer.reset();
-            sendRequest();
+            var variables:URLVariables = new URLVariables();
+            variables.id=id;
+            Global.currentBuilding = id;
+            sendRequest('http://localhost:8090/getShopIncome', variables);
         }
         Global.userOperation=false;
     }

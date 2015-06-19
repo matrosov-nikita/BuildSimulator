@@ -8,12 +8,12 @@ public class Main extends  Sprite{
     var  field:Field;
     public function Main() {
         stage.align = StageAlign.TOP_LEFT;
-        field = new Field(this);
+        field = new Field(stage);
         var menu:ButtonsMenu = new ButtonsMenu(field,stage);
         Global.coins.text = field.coins.toString();
         Global.coins.text = "Coins: " + field.coins;
         Global.coins.selectable=false;
-        addChild( Global.coins);
+        addChild(Global.coins);
     }
 }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="dataSourceStorage">
-  <data-source name="PostgreSQL - building_db@localhost [2]" uuid="591260a5-4ace-4cd9-a1ce-f298b5b10466">
+  <data-source name="PostgreSQL - building_db@localhost" uuid="2cf04cb9-e7a4-450c-99bb-7e2ce437a0fa">
     <database-info product="PostgreSQL" version="9.3.7" jdbc-version="4.0" driver-name="PostgreSQL Native Driver" driver-version="PostgreSQL 9.4 JDBC4 (build 1201)">
       <identifier-quote-string>&quot;</identifier-quote-string>
     </database-info>
@@ -1528,25 +1528,13 @@
       <column name="definition" sqlType="text" precision="2147483647" scale="0" nullable="true" jdbcType="12"/>
     </table>
     <table name="buildings" schema="public" catalog="building_db" type="TABLE">
-      <column name="build_id" sqlType="serial" precision="10" scale="0" nullable="false" jdbcType="4" def="bmV4dHZhbCgnYnVpbGRpbmdzX2J1aWxkX2lkX3NlcSc6OnJlZ2NsYXNzKQ==" autoIncrement="true"/>
+      <column name="build_id" sqlType="int4" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="type" sqlType="varchar" precision="20" scale="0" nullable="false" jdbcType="12"/>
       <column name="x" sqlType="int4" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="y" sqlType="int4" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="contract" sqlType="int4" precision="10" scale="0" nullable="true" jdbcType="4"/>
       <column name="time" sqlType="int4" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="buildings_pkey" columns="build_id"/>
-    </table>
-    <table name="buildings_build_id_seq" schema="public" catalog="building_db" type="SEQUENCE">
-      <column name="sequence_name" sqlType="name" precision="2147483647" scale="0" nullable="false" jdbcType="12"/>
-      <column name="last_value" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="start_value" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="increment_by" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="max_value" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="min_value" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="cache_value" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="log_cnt" sqlType="int8" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="is_cycled" sqlType="bool" precision="1" scale="0" nullable="false" jdbcType="-7"/>
-      <column name="is_called" sqlType="bool" precision="1" scale="0" nullable="false" jdbcType="-7"/>
     </table>
     <table name="fields" schema="public" catalog="building_db" type="TABLE">
       <column name="field_id" sqlType="serial" precision="10" scale="0" nullable="false" jdbcType="4" def="bmV4dHZhbCgnZmllbGRzX2ZpZWxkX2lkX3NlcSc6OnJlZ2NsYXNzKQ==" autoIncrement="true"/>

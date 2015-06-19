@@ -1,5 +1,6 @@
 
 package {
+import flash.display.Sprite;
 import flash.display.Stage;
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -17,7 +18,7 @@ public class ButtonsMenu {
     public const button_height:int=20;
     public const factory_cost:int = 30;
     public const  shop_cost:int = 20;
-
+    public const cell_size:int = 50;
     var myformat:TextFormat = new TextFormat("Georgia",13);
     var btnAddShop:MyButton;
     var btnAddFactory:MyButton;
@@ -27,6 +28,7 @@ public class ButtonsMenu {
 
     var field:Field;
     var stage:Stage;
+    var cursor:Sprite;
     public function ButtonsMenu(field:Field, stage:Stage) {
         this.field=field;
         this.stage=stage;
@@ -40,6 +42,7 @@ public class ButtonsMenu {
         Global.coins.border=true;
         Global.coins.borderColor=0xCCFF00;
         Global.coins.height = button_height;
+
         stage.addChild (btnAddShop);
         stage.addChild(btnAddFactory);
         stage.addChild(btnMove);
@@ -57,7 +60,7 @@ public class ButtonsMenu {
         if (field.coins>=20) {
             Mouse.hide();
             var p:String = "http://localhost:8090/images/auto_workshop.png";
-            new CustomCursor(p,field);
+            cursor =  new CustomCursor(p,field);
             field.field_sprite.addEventListener(MouseEvent.CLICK, addShop);
             Global.userOperation = true;
         }
@@ -67,7 +70,7 @@ public class ButtonsMenu {
         if (field.coins>=30) {
             Mouse.hide();
             var p:String = "http://localhost:8090/images/factory.png";
-            new CustomCursor(p,field);
+            cursor =  new CustomCursor(p,field);
             field.field_sprite.addEventListener(MouseEvent.CLICK, addFactory);
             Global.userOperation = true;
         }
@@ -75,33 +78,51 @@ public class ButtonsMenu {
 
     private function addFactory(event:MouseEvent):void {
 
-        var x:int = Math.floor(stage.mouseX/50);
-        var y:int = Math.floor(stage.mouseY/50);
-        if (field.addNewBuilding(x,y,"factory")==0)
-        {
-            Global.coins.text = "Coins: " + (field.coins-=factory_cost).toString();
-            field.field_sprite.buttonMode=false;
-            field.field_sprite.removeEventListener(MouseEvent.CLICK, addFactory);
-            Global.userOperation=false;
-            Mouse.show();
+        var x:int = Math.floor(stage.mouseX / cell_size);
+        var y:int = Math.floor(stage.mouseY / cell_size);
+        if (field.find_building(x, y) == -1) {
+            {
+                Global.coins.text = "Coins: " + (field.coins -= factory_cost).toString();
+                field.field_sprite.removeEventListener(MouseEvent.CLICK, addFactory);
+                Global.userOperation = false;
+                Mouse.show();
+                field.field_sprite.removeChild(cursor);
+                var variables:URLVariables = new URLVariables();
+                variables.id = ++Global.countInstances;
+                Global.currentBuilding = Global.countInstances;
+                variables.y = y;
+                variables.x = x;
+                variables.type = "factory";
+                variables.time = 0;
+                variables.contract=0;
+                sendRequest('http://localhost:8090/add', variables);
+
+            }
         }
-        sendRequest();
     }
 
 
     private function addShop(event:MouseEvent):void {
-        var x:int = Math.floor(stage.mouseX/50);
-        var y:int = Math.floor(stage.mouseY/50);
-        if (field.addNewBuilding(x,y,"auto_workshop")==0)
-        {
+        var x:int = Math.floor(stage.mouseX/cell_size);
+        var y:int = Math.floor(stage.mouseY/cell_size);
+        if (field.find_building(x,y)==-1) {
 
-            Global.coins.text = "Coins: " + (field.coins-=shop_cost).toString();
+            Global.coins.text = "Coins: " + (field.coins -= shop_cost).toString();
+            trace(field.coins);
             field.field_sprite.removeEventListener(MouseEvent.CLICK, addShop);
-            Global.userOperation=false;
+            Global.userOperation = false;
             Mouse.show();
+            field.field_sprite.removeChild(cursor);
+            var variables:URLVariables = new URLVariables();
+            variables.id = ++Global.countInstances;
+            Global.currentBuilding = Global.countInstances;
+            variables.y = y;
+            variables.x = x;
+            variables.type = "auto_workshop";
+            variables.time = 0;
+            sendRequest('http://localhost:8090/add', variables);
         }
 
-        sendRequest();
     }
 
     private function btn3Listener(event:MouseEvent):void {
@@ -113,26 +134,39 @@ public class ButtonsMenu {
 
     private function downHandler(event:MouseEvent):void {
 
-        var search_index:int = field.find_building(event.target.x/50, event.target.y/50);
+        var search_index:int = field.find_building(event.target.x/cell_size, event.target.y/cell_size);
         if (search_index!=-1) {
-            field.buildings[search_index].sprite.startDrag(false,new Rectangle(-field.buildings[search_index]._x*50-50,-field.buildings[search_index]._y*50-50,550,350));
+            field.buildings[search_index].sprite.startDrag(false,
+                    new Rectangle(
+                            -field.buildings[search_index]._x*cell_size-cell_size,
+                            -field.buildings[search_index]._y*cell_size-cell_size,
+                            field.field_width,
+                            field.field_height));
             field.buildings[search_index].sprite.addEventListener(MouseEvent.MOUSE_UP,up);
         }
     }
 
     private function up(event:MouseEvent):void {
 
-        var _x:int = event.target.x/50;
-        var _y:int =  event.target.y/50;
+        var _x:int = event.target.x/cell_size;
+        var _y:int =  event.target.y/cell_size;
         var search_index:int = field.find_building(_x, _y);
         event.currentTarget.stopDrag();
         for(var i:int = 0; i < field.buildings.length; i++) {
             field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
         }
         field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP,up);
-        field.buildings[search_index]._x = Math.floor(stage.mouseX/50);
-        field.buildings[search_index]._y=Math.floor(stage.mouseY/50);
-        sendRequest();
+        var new_x:Number = Math.floor(stage.mouseX/cell_size);
+        var new_y:Number = Math.floor(stage.mouseY/cell_size);
+        var variables:URLVariables = new URLVariables();
+        variables.y = new_y;
+        variables.x = new_x;
+        variables.id =  field.buildings[search_index].id;
+        Global.currentBuilding = field.buildings[search_index].id;
+        sendRequest('http://localhost:8090/move', variables);
+//        field.buildings[search_index]._x = Math.floor(stage.mouseX/cell_size);
+//        field.buildings[search_index]._y=Math.floor(stage.mouseY/cell_size);
+      //  sendRequest();
     }
 
     private function btn4Listener(event:MouseEvent):void {
@@ -144,27 +178,27 @@ public class ButtonsMenu {
 
     private function removeBuilding(event:MouseEvent):void {
 
-        var search_building:int =field.find_building(Math.floor(stage.mouseX/50),Math.floor(stage.mouseY/50));
+        var search_building:int =field.find_building(Math.floor(stage.mouseX/cell_size),Math.floor(stage.mouseY/cell_size));
         if (search_building == -1) {
             trace("Building doesn't exist");
         }
         else {
             var compensation:int = ((field.buildings[search_building].build_type=="factory")?factory_cost/2:shop_cost/2);
-            field.remove_building(search_building);
             Global.coins.text = "Coins: " + (field.coins+=compensation).toString();
             for(var i:int = 0; i < field.buildings.length; i++) {
                 field.buildings[i].sprite.removeEventListener(MouseEvent.CLICK, removeBuilding);
             }
-            sendRequest();
+            var variables:URLVariables = new URLVariables();
+            variables.id=field.buildings[search_building].id;
+            Global.currentBuilding = field.buildings[search_building].id;
+            sendRequest('http://localhost:8090/remove', variables);
         }
     }
 
-    private function sendRequest():void {
-       // Security.loadPolicyFile('http://localhost:8090/crossdomain.xml');
-        var url:String = 'http://localhost:8090/';
+    private function sendRequest(url,variables):void {
+        var url:String = url;
         var request:URLRequest = new URLRequest(url);
-        var variables:URLVariables = new URLVariables();
-        variables.xml =field.convertToXML();
+        variables.xml =field.convertToXML().toXMLString();
         request.data = variables;
         request.contentType="text/xml";
         var loader:URLLoader = new URLLoader();
@@ -177,7 +211,9 @@ public class ButtonsMenu {
 
     }
     private function btn5Listener(event:MouseEvent):void {
-        sendRequest();
+        var variables:URLVariables = new URLVariables();
+        variables.xml = field.convertToXML().toXMLString();
+        sendRequest('http://localhost:8090/', variables);
     }
 }
 }

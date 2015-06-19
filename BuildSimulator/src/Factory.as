@@ -5,6 +5,7 @@ package {
 import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
+import flash.net.URLVariables;
 import flash.text.TextFormat;
 import flash.utils.Timer;
 public class Factory extends Building {
@@ -12,8 +13,8 @@ public class Factory extends Building {
     var contract1:MyButton;
     var contract2:MyButton;
     var contract_sprite:Sprite;
-    public function Factory(_x:Number, _y:Number, scene:Field, contract:int,time:int) {
-        super(_x, _y, scene,time);
+    public function Factory(id:Number,_x:Number, _y:Number, scene:Field, contract:int,time:int) {
+        super(id,_x, _y, scene,time);
         path="http://localhost:8090/images/factory.png";
         build_type="factory";
         this.contract = contract;
@@ -60,7 +61,11 @@ public class Factory extends Building {
             timer.reset();
             time=0;
             contract = 0;
-            sendRequest();
+            var variables:URLVariables = new URLVariables();
+            variables.id=id;
+            Global.currentBuilding = id;
+            variables.contract=contract;
+            sendRequest('http://localhost:8090/getFactoryIncome', variables);
         }
         Global.userOperation = false;
     }
@@ -86,7 +91,7 @@ public class Factory extends Building {
 
         if (scene.coins>=5) {
             Global.coins.text = "Coins: " + (scene.coins-=5).toString();
-            timer.repeatCount = 300;
+            timer.repeatCount = 5;
             startContract(1);
         }
     }
@@ -100,8 +105,11 @@ public class Factory extends Building {
         }
     }
     private function  startContract( number:int):void {
-            contract = number;
-        sendRequest();
+        var variables:URLVariables = new URLVariables();
+        variables.id=id;
+        variables.contract=number;
+        Global.currentBuilding = id;
+        sendRequest('http://localhost:8090/startContract', variables);
     }
 
     public override  function  Draw():void {
