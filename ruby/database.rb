@@ -48,14 +48,19 @@ end
        type=n.name
        x=n["x"]
        y=n["y"]
-       contract = n["contract"]
+       if (n["contract"]!=nil)
+         contract = n["contract"]
+       else
+         contract = 'NULL'
+       end
+
        time = n["time"]
        @conn.exec("update buildings set
                                   type='#{type}',
                                   x=#{x},
                                   y=#{y},
                                   time=#{time},
-                                   contract = #{(contract)?contract:'null'}
+                                   contract = #{contract}
                      where build_id=#{id}")
 end
   }
