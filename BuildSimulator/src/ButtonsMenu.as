@@ -68,7 +68,7 @@ public class ButtonsMenu {
 
     private function btn2Listener(event:MouseEvent):void {
         if (field.coins>=30) {
-            Mouse.hide();
+            //Mouse.hide();
             var p:String = "http://localhost:8090/images/factory.png";
             cursor =  new CustomCursor(p,field);
             field.field_sprite.addEventListener(MouseEvent.CLICK, addFactory);
@@ -80,7 +80,7 @@ public class ButtonsMenu {
 
         var x:int = Math.floor(stage.mouseX / cell_size);
         var y:int = Math.floor(stage.mouseY / cell_size);
-        if (field.find_building(x, y) == -1) {
+        if (field.find_building(x, y) == -1 && insideField(event.stageX,event.stageY)) {
             {
                 Global.coins.text = "Coins: " + (field.coins -= factory_cost).toString();
                 field.field_sprite.removeEventListener(MouseEvent.CLICK, addFactory);
@@ -105,7 +105,7 @@ public class ButtonsMenu {
     private function addShop(event:MouseEvent):void {
         var x:int = Math.floor(stage.mouseX/cell_size);
         var y:int = Math.floor(stage.mouseY/cell_size);
-        if (field.find_building(x,y)==-1) {
+        if (field.find_building(x,y)==-1 && insideField(event.stageX,event.stageY)) {
 
             Global.coins.text = "Coins: " + (field.coins -= shop_cost).toString();
             trace(field.coins);
@@ -148,25 +148,27 @@ public class ButtonsMenu {
 
     private function up(event:MouseEvent):void {
 
-        var _x:int = event.target.x/cell_size;
-        var _y:int =  event.target.y/cell_size;
-        var search_index:int = field.find_building(_x, _y);
-        event.currentTarget.stopDrag();
-        for(var i:int = 0; i < field.buildings.length; i++) {
-            field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
-        }
-        field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP,up);
-        var new_x:Number = Math.floor(stage.mouseX/cell_size);
-        var new_y:Number = Math.floor(stage.mouseY/cell_size);
-        var variables:URLVariables = new URLVariables();
-        variables.y = new_y;
-        variables.x = new_x;
-        variables.id =  field.buildings[search_index].id;
-        Global.currentBuilding = field.buildings[search_index].id;
-        sendRequest('http://localhost:8090/move', variables);
+        var _x:int = event.target.x / cell_size;
+        var _y:int = event.target.y / cell_size;
+        if (insideField(event.stageX, event.stageY)) {
+            var search_index:int = field.find_building(_x, _y);
+            event.currentTarget.stopDrag();
+            for (var i:int = 0; i < field.buildings.length; i++) {
+                field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
+            }
+            field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
+            var new_x:Number = Math.floor(stage.mouseX / cell_size);
+            var new_y:Number = Math.floor(stage.mouseY / cell_size);
+            var variables:URLVariables = new URLVariables();
+            variables.y = new_y;
+            variables.x = new_x;
+            variables.id = field.buildings[search_index].id;
+            Global.currentBuilding = field.buildings[search_index].id;
+            sendRequest('http://localhost:8090/move', variables);
 //        field.buildings[search_index]._x = Math.floor(stage.mouseX/cell_size);
 //        field.buildings[search_index]._y=Math.floor(stage.mouseY/cell_size);
-      //  sendRequest();
+            //  sendRequest();
+        }
     }
 
     private function btn4Listener(event:MouseEvent):void {
@@ -214,6 +216,16 @@ public class ButtonsMenu {
         var variables:URLVariables = new URLVariables();
         variables.xml = field.convertToXML().toXMLString();
         sendRequest('http://localhost:8090/', variables);
+    }
+    private function insideField(x:int, y:int):Boolean {
+        var w:Number = 0.8556*field.field_width;
+        var h:Number = 0.7492*field.field_height;
+        var a:Number= 0.5*w;
+        var b:Number = 0.5*h;
+        var centerX:Number = field.field_width/2;
+        var centerY:Number = field.field_height/2;
+        return Math.abs(x-centerX)/a+Math.abs(y-centerY)/b<=0.9;
+
     }
 }
 }
