@@ -9,10 +9,24 @@ import flash.net.URLVariables;
 import flash.text.TextFormat;
 import flash.utils.Timer;
 public class Factory extends Building {
+    public const time_contract1:int = 300000;
+    public const time_contract2:int = 900000;
+    public const profit_contract1:int=30;
+    public const profit_contract2:int=50;
+    public const cost_launch_contract1:int=5;
+    public const cost_launch_contract2:int=10;
+    public const width_button_contract:int=20;
+    public const height_button_contract:int=15;
+    public const offset_button_contract:int=21;
+    public const name_button_contract1:String="К1";
+    public const name_button_contract2:String="К2";
+    public const width_contract_image:int = 15;
+    public const height_contract_image:int = 15;
     public var contract:int;
     var contract1:MyButton;
     var contract2:MyButton;
     var contract_sprite:Sprite;
+
     public function Factory(id:Number,_x:Number, _y:Number, scene:Field, contract:int,time:int) {
         super(id,_x, _y, scene,time);
         path="http://localhost:8090/images/factory.png";
@@ -21,27 +35,30 @@ public class Factory extends Building {
         if (contract==0) {
             sprite.addEventListener(MouseEvent.CLICK, chooseContract);
         }
-        timer = new Timer(1000);
-        if (contract!=0) {
-            var time_to_complete:int = ((contract==1)?300000:900000);
-            var repCount:int = Math.floor((time_to_complete-time)/1000);
-           if (repCount==0)
-           {
-               ready();
-           }
-            else {
-               timer.repeatCount =repCount;
-               state="В работе";
-               timer.start();
-           }
-        }
+        launchTimer();
         timer.addEventListener(TimerEvent.TIMER, tick);
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
     }
 
+    private function launchTimer():void {
+        timer = new Timer(Global.time_tick);
+        if (contract!=0) {
+            var time_to_complete:int = ((contract==1)?time_contract1:time_contract2);
+            var repCount:int = Math.floor((time_to_complete-time)/Global.time_tick);
+            if (repCount==0)
+            {
+                ready();
+            }
+            else {
+                timer.repeatCount =repCount;
+                state="В работе";
+                timer.start();
+            }
+        }
+    }
     private function ready(event:TimerEvent=null):void {
         state="Готов к сбору";
-        Redraw();
+        redraw();
         sprite.addEventListener(MouseEvent.CLICK, getProfit);
         sprite.removeEventListener(MouseEvent.CLICK, chooseContract);
         sprite.buttonMode=true;
@@ -51,10 +68,10 @@ public class Factory extends Building {
 
         if (Global.userOperation==false) {
             if (contract == 1) {
-                Global.coins.text = "Coins: " + (scene.coins+=30).toString();
+                Global.coins.text = "Coins: " + (scene.coins+=profit_contract1).toString();
             }
             else {
-                Global.coins.text = "Coins: " + (scene.coins+=50).toString();
+                Global.coins.text = "Coins: " + (scene.coins+=profit_contract2).toString();
 
             }
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
@@ -71,14 +88,14 @@ public class Factory extends Building {
     }
 
     private function tick(event:TimerEvent):void {
-        Redraw();
+        redraw();
     }
 
     private function chooseContract(event:MouseEvent):void {
         if (contract==0 && Global.userOperation==false) {
             var myFormat = new TextFormat("Georgia",7);
-            contract1 = new MyButton(_x * 50, _y * 50, 20, 15, "K1", myFormat);
-            contract2 = new MyButton(_x * 50 + 21, _y * 50, 20, 15, "K2", myFormat);
+            contract1 = new MyButton(_x * cell_size, _y * cell_size, width_button_contract, height_button_contract, name_button_contract1, myFormat);
+            contract2 = new MyButton(_x * cell_size + offset_button_contract, _y * cell_size, width_button_contract, height_button_contract, name_button_contract2, myFormat);
             contract1.addEventListener(MouseEvent.CLICK, chooseContract1);
             contract2.addEventListener(MouseEvent.CLICK, chooseContract2);
             sprite.addChild(contract1);
@@ -89,18 +106,16 @@ public class Factory extends Building {
 
     private function chooseContract1(event:MouseEvent):void {
 
-        if (scene.coins>=5) {
-            Global.coins.text = "Coins: " + (scene.coins-=5).toString();
-            timer.repeatCount = 5;
+        if (scene.coins>=cost_launch_contract1) {
+            Global.coins.text = "Coins: " + (scene.coins-=cost_launch_contract1).toString();
             startContract(1);
         }
     }
 
     private function chooseContract2(event:MouseEvent):void {
 
-        if (scene.coins>=10) {
-            Global.coins.text = "Coins: " + (scene.coins-=10).toString();
-            timer.repeatCount = 900;
+        if (scene.coins>=cost_launch_contract2) {
+            Global.coins.text = "Coins: " + (scene.coins-=cost_launch_contract2).toString();
             startContract(2);
         }
     }
@@ -112,17 +127,17 @@ public class Factory extends Building {
         sendRequest('http://localhost:8090/startContract', variables);
     }
 
-    public override  function  Draw():void {
+    public override  function draw():void {
 
         if (contract==1) {
-            contract_sprite = new Viewer("http://localhost:8090/images/contract_1.png",_x*50, _y*50,15,15);
+            contract_sprite = new Viewer("http://localhost:8090/images/contract_1.png",_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
             sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            contract_sprite = new Viewer("http://localhost:8090/images/contract_2.png",_x*50, _y*50,15,15);
+            contract_sprite = new Viewer("http://localhost:8090/images/contract_2.png",_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
             sprite.addChild(contract_sprite);
         }
-        super.Draw();
+        super.draw();
     }
 }
 }

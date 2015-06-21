@@ -1,8 +1,8 @@
-
+require_relative 'database'
 def route query,id,type,x,y,contract,time
 
-d = Database.new
-d.connect
+d = Database.instance
+# d.connect
   case query
     when '/add'
          d.insert id,type,x,y,contract,time

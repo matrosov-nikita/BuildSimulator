@@ -1,7 +1,9 @@
 require   'pg'
 require 'nokogiri'
+require 'singleton'
 
 class Database
+  include Singleton
 def connect
   @conn = PG.connect(
       :dbname => 'building_db',
@@ -33,6 +35,7 @@ end
 def resetTime id
   @conn.exec("update buildings set time=0 where build_id = #{id}")
 end
+
 def updateContract id,contract
   @conn.exec("update buildings set contract=#{contract} where build_id = #{id}")
 end

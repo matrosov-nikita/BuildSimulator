@@ -1,16 +1,12 @@
-/**
- * Created by nik on 22.05.15.
- */
 package {
-
-
 import flash.display.Sprite;
 import flash.display.Stage;
 
 public class Field {
     public const field_width:int = 550;
     public const field_height:int = 350;
-    public const start_coins = 700;
+    public const start_coins:int = 70;
+    public const tick:int=1000;
     public const path = "http://localhost:8090/images/field.jpg";
     public var buildings:Array;
     public var coins:int;
@@ -38,11 +34,8 @@ public class Field {
     }
 
     public function drawField(info:XML):void{
-
         var find:Boolean = false;
-
         if (info != null) {
-           // removeAllBuildings();
             coins = info.@coins;
             for each(var child:XML in info.*) {
                 var id:int = child.@id;
@@ -55,38 +48,53 @@ public class Field {
                     var index:int = findBuildingById(id);
                     if (index!=-1)
                     {
-                        field_sprite.removeChild(buildings[index].sprite);
-                        buildings[index]=null;
-                        if (child.name() == "auto_workshop") {
-                            buildings[index] = new Workship(id,x, y, this, time);
-                        }
-                        else {
-                            buildings[index] =  new Factory(id,x, y, this, contract, time);
-                        }
-                        buildings[index].Draw();
+                        reCreatingBuiling(index,id,child.name(),x,y,this,time,contract);
                     }
                     else {
-                        if (child.name() == "auto_workshop") {
-                            buildings.push(new Workship(id,x, y, this, time));
-                        }
-                        else {
-                            buildings.push(new Factory(id,x, y, this, contract, time));
-                        }
-                        buildings[buildings.length-1].Draw();
+                        addBuidling(id,child.name(),x,y,this,time,contract);
                     }
                     find = true; break;
                 }
             }
            if (find==false) {
-                var r_index:Number = findBuildingById(Global.currentBuilding);
-                field_sprite.removeChild(buildings[r_index].sprite);
-               buildings.slice(r_index,1);
+               removeBuilding()
             }
         }
-      //  drawAllBuildings();
     }
 
-    public function find_building(x:int, y:int):int
+
+    public function removeBuilding():void {
+        var r_index:Number = findBuildingById(Global.currentBuilding);
+        field_sprite.removeChild(buildings[r_index].sprite);
+        buildings.slice(r_index,1);
+    }
+
+    public function addBuidling(id:int, type:String, x:int,y:int,scene:Field,time:int, contract):void
+    {
+        if (type == "auto_workshop") {
+            buildings.push(new Workshop(id,x, y, this, time));
+        }
+        else {
+            buildings.push(new Factory(id,x, y, this, contract, time));
+        }
+        buildings[buildings.length-1].draw();
+    }
+
+
+    public function reCreatingBuiling(index:int, id:int, type:String, x:int,y:int,scene:Field,time:int, contract):void {
+        field_sprite.removeChild(buildings[index].sprite);
+        buildings[index]=null;
+        if (type== "auto_workshop") {
+            buildings[index] = new Workshop(id,x, y, this, time);
+        }
+        else {
+            buildings[index] =  new Factory(id,x, y, this, contract, time);
+        }
+        buildings[index].draw();
+    }
+
+
+    public function findBuilding(x:int, y:int):int
     {
         for(var i:int = 0; i < buildings.length; ++i)
         {
@@ -97,6 +105,7 @@ public class Field {
         }
         return -1;
     }
+
     public function findBuildingById(id:int) {
         for(var i:int = 0; i < buildings.length; ++i)
         {
@@ -121,7 +130,7 @@ public class Field {
                         x = {build._x}
                         y = {build._y}
                         contract={(build as Factory).contract}
-                        time={build.time + build.timer.currentCount*1000} />);
+                        time={build.time + build.timer.currentCount*Global.time_tick} />);
             }
             else
             {
@@ -129,7 +138,7 @@ public class Field {
                         id={build.id}
                         x = {build._x}
                         y = {build._y}
-                        time={build.time + build.timer.currentCount*1000} />);
+                        time={build.time + build.timer.currentCount*Global.time_tick} />);
             }
         }
 

@@ -4,7 +4,7 @@ require_relative 'router'
 require_relative 'database'
 
 
-@@conn = Database.new
+@@conn = Database.instance
 $policyInfo = '<?xml version="1.0"?>'
 $policyInfo += '<cross-domain-policy>'
 $policyInfo += '<allow-access-from domain="*" to-ports="8090" />'
@@ -29,7 +29,7 @@ class MyServlet < WEBrick::HTTPServlet::AbstractServlet
                   request.query["time"]
     response.status = 200
     response.content_type = "text/xml"
-  response.body = @@conn.generate_xml_by_table + "\n" if (request.path!="/")
+    response.body = @@conn.generate_xml_by_table + "\n" if (request.path!="/")
     else
       response.status = 200
       if (request.path=="/crossdomain.xml")
@@ -48,7 +48,7 @@ server = WEBrick::HTTPServer.new(:Port => 8090)
 server.mount "/", MyServlet
 
 trap("INT") {
+  puts "exit"
   server.shutdown
 }
-puts "start"
 server.start
