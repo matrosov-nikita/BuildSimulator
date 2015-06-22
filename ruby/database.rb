@@ -99,7 +99,7 @@ end
 
   def create_table_buildings
     @conn.exec("CREATE TABLE buildings(
-	build_id  PRIMARY KEY,
+	build_id  int PRIMARY KEY,
 	type VARCHAR (20)  NOT NULL,
   x int not null,
   y int not null,
@@ -114,9 +114,9 @@ field_id serial PRIMARY KEY,
 coins int not null);")
 end
 
- def drop_table
+ def update_table
    @conn.exec("DROP TABLE buildings;")
-   @conn.exec("drop table fields;")
+   create_table_buildings
  end
 
   def disconnet

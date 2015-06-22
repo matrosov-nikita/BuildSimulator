@@ -186,12 +186,17 @@ public class ButtonsMenu {
         request.contentType="text/xml";
         var loader:URLLoader = new URLLoader();
         loader.load(request);
+        loader.addEventListener(Event.OPEN,onOpen);
         loader.addEventListener(Event.COMPLETE, function onComplete() {
             var xml:XML = XML(loader.data);
             if (xml.name()=="field")
                 field.drawField(xml);
         });
 
+    }
+
+    private function onOpen(event:Event):void {
+        trace("open");
     }
     private function btn5Listener(event:MouseEvent):void {
         var variables:URLVariables = new URLVariables();

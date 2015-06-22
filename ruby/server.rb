@@ -1,20 +1,18 @@
-#!/usr/bin/env ruby
 require 'webrick'
 require_relative 'router'
 require_relative 'database'
 
 
-@@conn = Database.instance
+
 $policyInfo = '<?xml version="1.0"?>'
 $policyInfo += '<cross-domain-policy>'
 $policyInfo += '<allow-access-from domain="*" to-ports="8090" />'
 $policyInfo += "</cross-domain-policy>\0"
 
 class MyServlet < WEBrick::HTTPServlet::AbstractServlet
-
+  @@conn = Database.instance
   def do_GET (request, response)
     @@conn.connect
-
     if request.query["xml"]
     xmlstring = request.query["xml"]
       @@conn.updateField(xmlstring)
@@ -33,6 +31,7 @@ class MyServlet < WEBrick::HTTPServlet::AbstractServlet
     else
       response.status = 200
       if (request.path=="/crossdomain.xml")
+        @@conn.update_table
         response.content_type = "text/xml"
         response.body = $policyInfo + "\n"
       else
@@ -44,6 +43,8 @@ class MyServlet < WEBrick::HTTPServlet::AbstractServlet
 end
 
 server = WEBrick::HTTPServer.new(:Port => 8090)
+
+
 
 server.mount "/", MyServlet
 

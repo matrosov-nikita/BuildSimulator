@@ -1,6 +1,10 @@
 package {
 import flash.display.Sprite;
 import flash.display.Stage;
+import flash.events.Event;
+import flash.net.URLLoader;
+import flash.net.URLRequest;
+import flash.net.URLVariables;
 
 public class Field {
     public const field_width:int = 550;
@@ -144,6 +148,9 @@ public class Field {
 
         return buidling;
     }
+
+
+
 }
 }
 
