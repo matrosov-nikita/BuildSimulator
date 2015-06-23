@@ -33,7 +33,7 @@ public class Field {
 
     public function drawAllBuildings():void {
         for(var i:int = 0; i < buildings.length; ++i) {
-            buildings[i].Draw();
+            buildings[i].draw();
         }
     }
 
@@ -148,9 +148,37 @@ public class Field {
 
         return buidling;
     }
+    public function getField(xmlStr:XML):void {
+        var max:int=0;
+        coins = xmlStr.@coins;
+        Global.coins.text = "Coins: " + coins;
+        trace(coins);
+        for each(var child:XML in xmlStr.*) {
+            var id:int = child.@id;
+            var x:int = child.@x;
+            var y:int = child.@y;
+            var time:int = child.@time;
+            var contract:int = child.@contract;
+            addBuidling(id,child.name(),x,y,this,time,contract);
+            if (id>max) {
+                max=id;
+            }
+        }
+        drawAllBuildings();
+        Global.countInstances=max;
+    }
 
-
-
+    public function sendRequest():void {
+        var url:String = 'http://localhost:8090/get';
+        var request:URLRequest = new URLRequest(url);
+        var loader:URLLoader = new URLLoader();
+        loader.load(request);
+        loader.addEventListener(Event.COMPLETE, function onComplete() {
+            var xml:XML = XML(loader.data);
+            if (xml.name()=="field")
+                getField(xml);
+        });
+    }
 }
 }
 

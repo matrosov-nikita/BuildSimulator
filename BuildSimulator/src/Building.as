@@ -80,19 +80,19 @@ public class Building {
         t_state.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
 
-    public function sendRequest(url,variables):void {
-        var url:String = url;
-        var request:URLRequest = new URLRequest(url);
-        variables.xml =scene.convertToXML();
-        request.data = variables;
-        request.contentType="text/xml";
-        var loader:URLLoader = new URLLoader();
-        loader.load(request);
-        loader.addEventListener(Event.COMPLETE, function onComplete() {
-            var xml:XML = XML(loader.data);
-            if (xml.name()=="field")
-                scene.drawField(xml);
-        });
-    }
+//    public function sendRequest(url,variables):void {
+//        var url:String = url;
+//        var request:URLRequest = new URLRequest(url);
+//        variables.xml =scene.convertToXML();
+//        request.data = variables;
+//        request.contentType="text/xml";
+//        var loader:URLLoader = new URLLoader();
+//        loader.load(request);
+//        loader.addEventListener(Event.COMPLETE, function onComplete() {
+//            var xml:XML = XML(loader.data);
+//            if (xml.name()=="field")
+//                scene.drawField(xml);
+//        });
+//    }
 }
 }

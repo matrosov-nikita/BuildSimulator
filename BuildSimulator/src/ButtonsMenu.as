@@ -103,7 +103,8 @@ public class ButtonsMenu {
                     if (type == "factory") {
                         variables.contract = 0;
                     }
-                    sendRequest('http://localhost:8090/add', variables);
+                  //  sendRequest('http://localhost:8090/add', variables);
+                    HttpHelper.sendRequest('http://localhost:8090/add', variables,field);
                 }
             }
         }
@@ -148,7 +149,8 @@ public class ButtonsMenu {
             variables.x = new_x;
             variables.id = field.buildings[search_index].id;
             Global.currentBuilding = field.buildings[search_index].id;
-            sendRequest('http://localhost:8090/move', variables);
+           // sendRequest('http://localhost:8090/move', variables);
+            HttpHelper.sendRequest('http://localhost:8090/move', variables,field);
         }
     }
 
@@ -174,26 +176,27 @@ public class ButtonsMenu {
             var variables:URLVariables = new URLVariables();
             variables.id=field.buildings[search_building].id;
             Global.currentBuilding = field.buildings[search_building].id;
-            sendRequest('http://localhost:8090/remove', variables);
+          //  sendRequest('http://localhost:8090/remove', variables);
+            HttpHelper.sendRequest('http://localhost:8090/remove', variables,field);
         }
     }
 
-    private function sendRequest(url,variables):void {
-        var url:String = url;
-        var request:URLRequest = new URLRequest(url);
-        variables.xml =field.convertToXML().toXMLString();
-        request.data = variables;
-        request.contentType="text/xml";
-        var loader:URLLoader = new URLLoader();
-        loader.load(request);
-        loader.addEventListener(Event.OPEN,onOpen);
-        loader.addEventListener(Event.COMPLETE, function onComplete() {
-            var xml:XML = XML(loader.data);
-            if (xml.name()=="field")
-                field.drawField(xml);
-        });
-
-    }
+//    private function sendRequest(url,variables):void {
+//        var url:String = url;
+//        var request:URLRequest = new URLRequest(url);
+//        variables.xml =field.convertToXML().toXMLString();
+//        request.data = variables;
+//        request.contentType="text/xml";
+//        var loader:URLLoader = new URLLoader();
+//        loader.load(request);
+//        loader.addEventListener(Event.OPEN,onOpen);
+//        loader.addEventListener(Event.COMPLETE, function onComplete() {
+//            var xml:XML = XML(loader.data);
+//            if (xml.name()=="field")
+//                field.drawField(xml);
+//        });
+//
+//    }
 
     private function onOpen(event:Event):void {
         trace("open");
@@ -201,7 +204,8 @@ public class ButtonsMenu {
     private function btn5Listener(event:MouseEvent):void {
         var variables:URLVariables = new URLVariables();
         variables.xml = field.convertToXML().toXMLString();
-        sendRequest('http://localhost:8090/', variables);
+      //  sendRequest('http://localhost:8090/', variables);
+        HttpHelper.sendRequest('http://localhost:8090/', variables,field);
     }
     private function insideField(x:int, y:int):Boolean {
         var w:Number = 0.8556*field.field_width;

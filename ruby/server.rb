@@ -28,19 +28,19 @@ class MyServlet < WEBrick::HTTPServlet::AbstractServlet
     response.status = 200
     response.content_type = "text/xml"
     response.body = @@conn.generate_xml_by_table + "\n" if (request.path!="/")
-    else
+
+      elsif (request.path=="/crossdomain.xml")
       response.status = 200
-      if (request.path=="/crossdomain.xml")
-        @@conn.update_table
+        # @@conn.update_table
         response.content_type = "text/xml"
         response.body = $policyInfo + "\n"
+    elsif request.path=='/get'
+      response.body = @@conn.generate_xml_by_table + "\n"
       else
     response.body = File.new(request.path[1,request.path.size-1])
       end
       end
   end
-
-end
 
 server = WEBrick::HTTPServer.new(:Port => 8090)
 

@@ -82,7 +82,8 @@ public class Factory extends Building {
             variables.id=id;
             Global.currentBuilding = id;
             variables.contract=contract;
-            sendRequest('http://localhost:8090/getFactoryIncome', variables);
+          //  sendRequest('http://localhost:8090/getFactoryIncome', variables);
+            HttpHelper.sendRequest('http://localhost:8090/getFactoryIncome', variables,scene);
         }
         Global.userOperation = false;
     }
@@ -124,7 +125,8 @@ public class Factory extends Building {
         variables.id=id;
         variables.contract=number;
         Global.currentBuilding = id;
-        sendRequest('http://localhost:8090/startContract', variables);
+        //sendRequest('http://localhost:8090/startContract', variables);
+        HttpHelper.sendRequest('http://localhost:8090/startContract', variables,scene);
     }
 
     public override  function draw():void {

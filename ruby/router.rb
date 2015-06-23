@@ -7,11 +7,10 @@ d = Database.instance
     when '/add'
          d.insert id,type,x,y,contract,time
     when '/remove'
-      puts "ID",id
       d.remove id
     when '/move'
       d.update id,x,y
-   when '/getShopIncome'
+    when '/getShopIncome'
       d.resetTime id
     when '/startContract'
       d.updateContract id, contract

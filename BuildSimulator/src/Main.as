@@ -4,12 +4,15 @@
 package {
 import flash.display.Sprite;
 import flash.display.StageAlign;
+import flash.display.StageScaleMode;
+
 public class Main extends  Sprite{
     var  field:Field;
     public function Main() {
         stage.align = StageAlign.TOP_LEFT;
-       // stage.scaleMode=StageScaleMode.NO_SCALE;
+        //stage.scaleMode=StageScaleMode.NO_SCALE;
         field = new Field(stage);
+        field.sendRequest();
         var menu:ButtonsMenu = new ButtonsMenu(field,stage);
         Global.coins.text = field.coins.toString();
         Global.coins.text = "Coins: " + field.coins;

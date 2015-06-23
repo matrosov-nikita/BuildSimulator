@@ -44,7 +44,8 @@ public class Workshop extends Building {
             var variables:URLVariables = new URLVariables();
             variables.id=id;
             Global.currentBuilding = id;
-            sendRequest('http://localhost:8090/getShopIncome', variables);
+           // sendRequest('http://localhost:8090/getShopIncome', variables);
+            HttpHelper.sendRequest('http://localhost:8090/getShopIncome', variables,scene);
         }
         Global.userOperation=false;
     }
