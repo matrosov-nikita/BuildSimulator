@@ -2,9 +2,9 @@ package {
 import flash.display.SimpleButton;
 import flash.text.TextFormat;
 public class MyButton  extends SimpleButton{
-    private var upColor:uint   = 0xFFCC00;
-    private var overColor:uint = 0xCCFF00;
-    private var downColor:uint = 0x00CCFF;
+    private static const upColor:uint   = 0xFFCC00;
+    private static const overColor:uint = 0xCCFF00;
+    private static const downColor:uint = 0x00CCFF;
     public function MyButton(_x:int, _y:int, width:int, height:int,_text:String,textFormat:TextFormat) {
       overState = new ButtonDisplayState(_x, _y, width, height, _text, textFormat, overColor);
       downState =  new ButtonDisplayState(_x, _y, width, height, _text, textFormat, downColor);

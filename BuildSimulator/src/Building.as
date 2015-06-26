@@ -4,8 +4,10 @@ import flash.display.Loader;
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.events.TimerEvent;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
+import flash.net.URLVariables;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.Timer;
@@ -27,8 +29,7 @@ public class Building {
     public var t_state:TextField;
     public var path:String;
     public var build_type:String;
-    public function Building(id:Number,_x: Number, _y:Number, scene: Field,time:int){
-        this.id=id;
+    public function Building(_x: Number, _y:Number, scene: Field,time:int,contract:int){
         this._x = _x;
         this._y = _y;
         this.scene = scene;
@@ -79,20 +80,47 @@ public class Building {
         var seconds:int = diff%60;
         t_state.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
+    public function tick(event:TimerEvent):void {
+        redraw();
+    }
+    public function ready(event:TimerEvent=null):void {
+        var variables:URLVariables = new URLVariables();
+        variables.x = _x;
+        variables.y = _y;
+        HttpHelper.sendRequest2('http://localhost:4567/isBuildComplete', variables, function(data) {
+            state = "Готов к сбору";
+            redraw();
+            sprite.addEventListener(MouseEvent.CLICK, getProfit);
+        });
 
-//    public function sendRequest(url,variables):void {
-//        var url:String = url;
-//        var request:URLRequest = new URLRequest(url);
-//        variables.xml =scene.convertToXML();
-//        request.data = variables;
-//        request.contentType="text/xml";
-//        var loader:URLLoader = new URLLoader();
-//        loader.load(request);
-//        loader.addEventListener(Event.COMPLETE, function onComplete() {
-//            var xml:XML = XML(loader.data);
-//            if (xml.name()=="field")
-//                scene.drawField(xml);
-//        });
-//    }
+    }
+
+    public function getProfit(event:MouseEvent):void {
+
+    }
+
+
+    public function  remove(index:int):void {
+        scene.field_sprite.removeChild(sprite);
+        scene.buildings.slice(index,1);
+    }
+
+    public function move(index,new_x,new_y):void {
+        scene.buildings[index]._x = new_x;
+        scene.buildings[index]._y = new_y;
+        scene.field_sprite.removeChild(sprite);
+        loader.x = new_x*cell_size;
+        loader.y = new_y*cell_size;
+        sprite = new Sprite();
+        sprite.addChild(loader);
+        t_state.x = new_x*cell_size;
+        t_state.y=new_y*cell_size+offset_label;
+        sprite.addChild(t_state);
+        scene.field_sprite.addChild(sprite);
+        sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
+
+    }
+
+
 }
 }

@@ -11,7 +11,7 @@ public class Field {
     public const field_height:int = 350;
     public const start_coins:int = 70;
     public const tick:int=1000;
-    public const path = "http://localhost:8090/images/field.jpg";
+    public const path = "http://localhost:4567/field.jpg";
     public var buildings:Array;
     public var coins:int;
     public var field_sprite:Sprite;
@@ -21,81 +21,25 @@ public class Field {
         buildings = new Array();
         field_sprite = new Sprite();
         field_sprite.addChild(new Viewer(path,0, 0, field_width, field_height));
+        field_sprite.cacheAsBitmap=true;
+        trace("КЭШИРОВАНИЕ",field_sprite.cacheAsBitmap);
         stage.addChild(field_sprite);
     }
 
-    public function removeAllBuildings():void {
-        while (field_sprite.numChildren > 1) {
-            field_sprite.removeChildAt(1);
-        }
-        buildings=[];
+    public function getObject(type: String):Object{
+        var object_types:Object = {auto_workshop: Workshop, factory: Factory};
+
+        return object_types[type]
     }
 
-    public function drawAllBuildings():void {
-        for(var i:int = 0; i < buildings.length; ++i) {
-            buildings[i].draw();
-        }
-    }
-
-    public function drawField(info:XML):void{
-        var find:Boolean = false;
-        if (info != null) {
-            coins = info.@coins;
-            for each(var child:XML in info.*) {
-                var id:int = child.@id;
-                if (id == Global.currentBuilding)
-                {
-                    var x:int = child.@x;
-                    var y:int = child.@y;
-                    var time:int = child.@time;
-                    var contract:int = child.@contract;
-                    var index:int = findBuildingById(id);
-                    if (index!=-1)
-                    {
-                        reCreatingBuiling(index,id,child.name(),x,y,this,time,contract);
-                    }
-                    else {
-                        addBuidling(id,child.name(),x,y,this,time,contract);
-                    }
-                    find = true; break;
-                }
-            }
-           if (find==false) {
-               removeBuilding()
-            }
-        }
-    }
-
-
-    public function removeBuilding():void {
-        var r_index:Number = findBuildingById(Global.currentBuilding);
-        field_sprite.removeChild(buildings[r_index].sprite);
-        buildings.slice(r_index,1);
-    }
-
-    public function addBuidling(id:int, type:String, x:int,y:int,scene:Field,time:int, contract):void
+    public function addBuidling(type:String, x:int,y:int,time:int,contract:int=0):void
     {
-        if (type == "auto_workshop") {
-            buildings.push(new Workshop(id,x, y, this, time));
-        }
-        else {
-            buildings.push(new Factory(id,x, y, this, contract, time));
-        }
+       var object:Object = getObject(type);
+
+        buildings.push(new object(x,y,this,time,contract));
         buildings[buildings.length-1].draw();
     }
 
-
-    public function reCreatingBuiling(index:int, id:int, type:String, x:int,y:int,scene:Field,time:int, contract):void {
-        field_sprite.removeChild(buildings[index].sprite);
-        buildings[index]=null;
-        if (type== "auto_workshop") {
-            buildings[index] = new Workshop(id,x, y, this, time);
-        }
-        else {
-            buildings[index] =  new Factory(id,x, y, this, contract, time);
-        }
-        buildings[index].draw();
-    }
 
 
     public function findBuilding(x:int, y:int):int
@@ -110,16 +54,6 @@ public class Field {
         return -1;
     }
 
-    public function findBuildingById(id:int) {
-        for(var i:int = 0; i < buildings.length; ++i)
-        {
-            if (buildings[i].id==id)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
 
     public function convertToXML():XML {
         var buidling:XML = <field coins={coins}> </field>;
@@ -148,37 +82,40 @@ public class Field {
 
         return buidling;
     }
+
+
     public function getField(xmlStr:XML):void {
-        var max:int=0;
         coins = xmlStr.@coins;
         Global.coins.text = "Coins: " + coins;
         trace(coins);
         for each(var child:XML in xmlStr.*) {
-            var id:int = child.@id;
             var x:int = child.@x;
             var y:int = child.@y;
-            var time:int = child.@time;
             var contract:int = child.@contract;
-            addBuidling(id,child.name(),x,y,this,time,contract);
-            if (id>max) {
-                max=id;
-            }
+            var state:String = child.@state;
+            var time:int = getTimeByState(state,contract);
+
+            addBuidling(child.name(),x,y,time,contract);
         }
-        drawAllBuildings();
-        Global.countInstances=max;
     }
 
-    public function sendRequest():void {
-        var url:String = 'http://localhost:8090/get';
-        var request:URLRequest = new URLRequest(url);
-        var loader:URLLoader = new URLLoader();
-        loader.load(request);
-        loader.addEventListener(Event.COMPLETE, function onComplete() {
-            var xml:XML = XML(loader.data);
-            if (xml.name()=="field")
-                getField(xml);
-        });
+    public function getTimeByState(state:String,contract:int):int {
+            var time:int=0;
+            switch(state) {
+//            case "stand":
+//                if (contract==2) time = Factory.time_contract2; else
+//                time=Factory.time_contract1;
+//                break;
+            case "collect":
+                case "stand":
+                   time=0;break;
+            default:
+               time = Math.floor(Number(state));
+
+        }
+        return time;
     }
+
 }
 }
 
