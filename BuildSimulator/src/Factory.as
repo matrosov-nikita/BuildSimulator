@@ -8,8 +8,6 @@ import flash.events.TimerEvent;
 import flash.net.URLVariables;
 import flash.text.TextFormat;
 import flash.utils.Timer;
-
-
 public class Factory extends Building {
     public static const time_contract1:int = 300;
     public static const time_contract2:int = 900;
@@ -20,20 +18,25 @@ public class Factory extends Building {
     public const width_button_contract:int=20;
     public const height_button_contract:int=15;
     public const offset_button_contract:int=21;
-    public const name_button_contract1:String="К1";
-    public const name_button_contract2:String="К2";
     public const width_contract_image:int = 15;
     public const height_contract_image:int = 15;
+    public const name_button_contract1:String="К1";
+    public const name_button_contract2:String="К2";
+    public const path_factory:String = "http://localhost:4567/factory.png";
+    public const path_contract1:String = "http://localhost:4567/contract_1.png";
+    public const path_contract2:String = "http://localhost:4567/contract_2.png";
+    public const path_start_contract:String  = "http://localhost:4567/startContract";
+    public const path_get_factory_income:String = "http://localhost:4567/getFactoryIncome";
     public var contract:int;
     var contract1:Sprite;
     var contract2:Sprite;
     var contract_sprite:Sprite;
-      var visible_contract:Boolean = false;
+    var visible_contract:Boolean = false;
+
     public function Factory(_x:Number, _y:Number, scene:Field,time:int, contract:int) {
         super(_x, _y, scene,time, contract);
-        path="http://localhost:4567/factory.png";
+        path=path_factory;
         build_type="factory";
-
         this.contract = contract;
         if (contract==0) {
             sprite.addEventListener(MouseEvent.CLICK, chooseContract);
@@ -51,37 +54,38 @@ public class Factory extends Building {
     }
 
     public override function getProfit(event:MouseEvent):void {
-
         if (Global.userOperation==false) {
-            if (contract == 1) {
-                Global.coins.text = "Coins: " + (scene.coins+=profit_contract1).toString();
-            }
-            else {
-                Global.coins.text = "Coins: " + (scene.coins+=profit_contract2).toString();
-
-            }
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
-
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
-            HttpHelper.sendRequest('http://localhost:4567/getFactoryIncome', variables,function(data) {
+            HttpHelper.sendRequest(path_get_factory_income, variables,function(data) {
                 if (data=="true") {
-                    timer.reset();
-                    time = 0;
-                    contract = 0;
-                    state="Простаивает";
-                    redraw();
-                    clearContract();
-                    sprite.addEventListener(MouseEvent.CLICK, chooseContract);
-                    visible_contract = false;
+                    if (contract == 1) {
+                        Global.coins.text = "Coins: " + (scene.coins+=profit_contract1).toString();
+                    }
+                    else {
+                        Global.coins.text = "Coins: " + (scene.coins+=profit_contract2).toString();
+                    }
+                    resetFactoryProperties();
                 }
                 else {
-                    Global.errors.text = "Не удалось собрать прибыль с фабрики";
+                    Global.error_field.text = Global.error_array["profitFactory"];
                 }
             });
         }
         Global.userOperation = false;
+    }
+
+    private function resetFactoryProperties():void {
+        timer.reset();
+        time = 0;
+        contract = 0;
+        state=Global.state["stand"];
+        redraw();
+        clearContract();
+        sprite.addEventListener(MouseEvent.CLICK, chooseContract);
+        visible_contract = false;
     }
 
     private function chooseContract(event:MouseEvent):void {
@@ -119,7 +123,7 @@ public class Factory extends Building {
         variables.contract=number;
         variables.x = _x;
         variables.y=_y;
-        HttpHelper.sendRequest('http://localhost:4567/startContract', variables,function(data) {
+        HttpHelper.sendRequest(path_start_contract, variables,function(data) {
             if (data=="true") {
                 contract = number;
                 if (contract == 1) {
@@ -134,7 +138,7 @@ public class Factory extends Building {
                 drawContract();
             }
             else {
-                Global.coins.text = "Не удалось запустить контракт";
+                Global.error_field.text = Global.state["startContract"];
             }
         });
     }
@@ -146,11 +150,11 @@ public class Factory extends Building {
 
     private function drawContract():void {
         if (contract==1) {
-            contract_sprite = new Viewer("http://localhost:4567/contract_1.png",_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
+            contract_sprite = new Viewer(path_contract1,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
             sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            contract_sprite = new Viewer("http://localhost:4567/contract_2.png",_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
+            contract_sprite = new Viewer(path_contract1,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
             sprite.addChild(contract_sprite);
         }
     }
@@ -159,7 +163,7 @@ public class Factory extends Building {
         sprite.removeChild(contract_sprite);
     }
 
-    public override function move(index,new_x,new_y):void {
+    public override function move(index:int,new_x:int,new_y:int):void {
         super.move(index,new_x,new_y);
          if (contract==0) sprite.addEventListener(MouseEvent.CLICK, chooseContract); else
              drawContract();

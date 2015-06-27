@@ -6,8 +6,7 @@ public class Field {
     public const field_width:int = 550;
     public const field_height:int = 350;
     public const start_coins:int = 70;
-    public const tick:int=1000;
-    public const path = "http://localhost:4567/field.jpg";
+    public const path:String = "http://localhost:4567/field.jpg";
     public var buildings:Array;
     public var coins:int;
     public var field_sprite:Sprite;

@@ -65,6 +65,7 @@ get '/isBuildComplete' do
   x = params['x']
   y = params['y']
   if valid_numbers(x,y)
+    p Building.instance.isBuildComplete(x,y).to_s
     return Building.instance.isBuildComplete(x,y).to_s
   end
   "false"

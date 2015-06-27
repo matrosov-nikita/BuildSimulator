@@ -6,7 +6,6 @@ import flash.net.URLVariables;
 
 public class HttpHelper {
         public static function sendRequest(url:String, variables:URLVariables, func:Function):void {
-            trace(url);
             var request:URLRequest = new URLRequest(url);
             request.data = variables;
             request.contentType="text/xml";
@@ -15,7 +14,6 @@ public class HttpHelper {
             loader.addEventListener(Event.COMPLETE, function onComplete() {
                 func(loader.data);
             });
-
     }
 }
 }

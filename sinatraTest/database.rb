@@ -42,6 +42,7 @@ end
 
 
 def get_coins
+  p @@conn.exec("select coins from fields")
   @@conn.exec("select coins from fields")
 end
 

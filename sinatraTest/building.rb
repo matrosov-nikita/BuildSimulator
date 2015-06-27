@@ -111,9 +111,8 @@ class Building
 
 
   def isBuildComplete x,y
-
     time = Time.now - Time.parse(getTime(x,y))
-    if time >= getWorkTime(getContract(x,y))
+    if time+1 >= getWorkTime(getContract(x,y))
       return true
     end
     false
@@ -141,8 +140,6 @@ class Building
   end
 
   def getWorkTime contract
-    p "CONTRACT"
-    p contract
     if (contract==nil)
       return SHOP_TIME_WORKING
     end
@@ -162,6 +159,8 @@ class Building
 
   def generateXMLByTable
     coins = getCoins
+    p "COINS"
+    p coins
     resultString = "<field coins='#{coins}'>"
     buildings = get_all_buildings()
     buildings.each do |r|

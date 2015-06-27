@@ -5,7 +5,6 @@ import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
-import flash.net.URLLoader;
 import flash.net.URLRequest;
 import flash.net.URLVariables;
 import flash.text.TextField;
@@ -17,6 +16,7 @@ public class Building {
     public const height_building:int=40;
     public const height_label:int=25;
     public const offset_label:int=30;
+    public const path_is_build:String="http://localhost:4567/isBuildComplete";
     public var _x:int;
     public var _y:int;
     public var state:String;
@@ -33,7 +33,7 @@ public class Building {
         this._y = _y;
         this.scene = scene;
         this.time=time;
-        if (time==0) state="Простаивает"; else state="В работе";
+        if (time==0) state=Global.state["stand"]; else state=Global.state["work"];
         sprite = new Sprite();
         t_state = new TextField();
         sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
@@ -50,17 +50,15 @@ public class Building {
     }
 
     public function launchTimer():void {
-
         var repCount:int = time;
-
         if (repCount==0) ready();
         else {
             timer.repeatCount =repCount;
-            trace(timer.repeatCount);
-            state = "В работе";
+            state = Global.state["work"];
             timer.start();
         }
     }
+
     private function onLoad(event:Event):void {
         setLabelBuidling();
         loader.x = _x*cell_size;
@@ -72,7 +70,7 @@ public class Building {
     }
 
     public function setLabelBuidling():void {
-        var myFormat = new TextFormat("Georgia",7);
+        var myFormat:TextFormat = new TextFormat("Georgia",7);
         t_state.height=height_label;
         t_state.defaultTextFormat=myFormat;
         t_state.text = state;
@@ -89,8 +87,9 @@ public class Building {
         var diff:int = k-l;
         var minutes:int = diff/60;
         var seconds:int = diff%60;
-        t_state.text = state+((timer!=null && state=="В работе")?("\n" +minutes+"м. " + seconds+"с." ):"");
+        t_state.text = state+((timer!=null && state==Global.state["work"])?("\n" +minutes+"м. " + seconds+"с." ):"");
     }
+
     public function tick(event:TimerEvent):void {
         redraw();
     }
@@ -98,17 +97,16 @@ public class Building {
         var variables:URLVariables = new URLVariables();
         variables.x = _x;
         variables.y = _y;
-        HttpHelper.sendRequest('http://localhost:4567/isBuildComplete', variables, function(data) {
+        HttpHelper.sendRequest(path_is_build, variables, function(data) {
             if (data=="true") {
-                state = "Готов к сбору";
+                state = Global.state["ready"];
                 redraw();
                 sprite.addEventListener(MouseEvent.CLICK, getProfit);
             }
             else {
-                Global.errors.text = "Построение не заверешено"
+                Global.error_field.text = Global.error_array["isBuild"];
             }
         });
-
     }
 
     public function getProfit(event:MouseEvent):void {
@@ -120,7 +118,7 @@ public class Building {
         timer.reset();
     }
 
-    public function move(index,new_x,new_y):void {
+    public function move(index:int,new_x:int,new_y:int):void {
         scene.buildings[index]._x = new_x;
         scene.buildings[index]._y = new_y;
         scene.field_sprite.removeChild(sprite);
@@ -135,7 +133,5 @@ public class Building {
         sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
 
     }
-
-
 }
 }

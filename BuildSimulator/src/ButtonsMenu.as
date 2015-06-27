@@ -24,6 +24,9 @@ public class ButtonsMenu {
     public const button_offset:int = 10;
     public const cursor_for_shop:String ="http://localhost:4567/auto_workshop.png";
     public const cursor_for_factory:String="http://localhost:4567/factory.png";
+    public const path_add_building = "http://localhost:4567/addBuilding";
+    public const path_move_building = "http://localhost:4567/moveBuilding";
+    public const path_remove_building = "http://localhost:4567/removeBuilding"
     var myformat:TextFormat = new TextFormat("Georgia",button_font_size);
     var names_button = ["Shop","Factory","Move","Remove"];
     var btnAddShop:MyButton;
@@ -45,11 +48,11 @@ public class ButtonsMenu {
     }
 
     private function setErrorsLabel():void {
-        Global.errors.x = this.field.field_width+button_offset;
-        Global.errors.y = (buttons.size-1)*button_height;
-        Global.errors.width=150;
-        Global.errors.textColor= 0xFF0000;
-        Global.errors.wordWrap=true;
+        Global.error_field.x = this.field.field_width+button_offset;
+        Global.error_field.y = (buttons.length+1)*button_height;
+        Global.error_field.width=150;
+        Global.error_field.textColor= 0xFF0000;
+        Global.error_field.wordWrap=true;
     }
     private function setCoinsLabel():void {
         Global.coins.x = this.field.field_width+button_offset;
@@ -99,7 +102,7 @@ public class ButtonsMenu {
                     variables.y = y;
                     variables.x = x;
                     variables.type = type;
-                    HttpHelper.sendRequest('http://localhost:4567/addBuilding', variables, function(data) {
+                    HttpHelper.sendRequest(path_add_building, variables, function(data) {
                        if (data=="true") {
                            var time:int = (type!="factory")?Workshop.time_working:0;
                            field.addBuidling(type,x,y,time,0);
@@ -107,7 +110,7 @@ public class ButtonsMenu {
                        }
                         else
                        {
-                           Global.errors.text="Невозможно добавить постройку";
+                           Global.error_field.text=Global.error_array["add"];
                        }
                     });
                 }
@@ -153,12 +156,12 @@ public class ButtonsMenu {
             variables.new_y = new_y;
             variables.x = _x;
             variables.y = _y;
-            HttpHelper.sendRequest('http://localhost:4567/moveBuilding', variables,function(data) {
+            HttpHelper.sendRequest(path_move_building, variables,function(data) {
                 if (data=="true") {
                     field.buildings[search_index].move(search_index,new_x,new_y);
                 }
                 else {
-                    Global.coins.text = "Перемещение в эти коордтнаты невозможно"
+                    Global.error_field.text = Global.error_array["move"]
                 }
             });
         }
@@ -180,18 +183,17 @@ public class ButtonsMenu {
             var variables:URLVariables = new URLVariables();
             variables.x=field.buildings[search_building]._x;
             variables.y=field.buildings[search_building]._y;
-            HttpHelper.sendRequest('http://localhost:4567/removeBuilding', variables, function(data) {
+            HttpHelper.sendRequest(path_remove_building, variables, function(data) {
               if (data=="true") {
                   field.buildings[search_building].remove(search_building);
                   var compensation:int = ((field.buildings[search_building].build_type=="factory")?cost_factory/2:cost_workshop/2);
                   Global.coins.text = "Coins: " + (field.coins+=compensation).toString();
               }
                 else {
-                  Global.errors.text = "Постройка не была удалена";
+                  Global.error_field.text = Global["remove"];
               }
             });
     }
-
 
     private function insideField(x:int, y:int):Boolean {
         var w:Number = 0.8556*field.field_width;
