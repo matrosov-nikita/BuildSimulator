@@ -17,7 +17,6 @@ public class Building {
     public const height_building:int=40;
     public const height_label:int=25;
     public const offset_label:int=30;
-    public var id:int;
     public var _x:int;
     public var _y:int;
     public var state:String;
@@ -50,6 +49,18 @@ public class Building {
         loader.load(new URLRequest(path));
     }
 
+    public function launchTimer():void {
+
+        var repCount:int = time;
+
+        if (repCount==0) ready();
+        else {
+            timer.repeatCount =repCount;
+            trace(timer.repeatCount);
+            state = "В работе";
+            timer.start();
+        }
+    }
     private function onLoad(event:Event):void {
         setLabelBuidling();
         loader.x = _x*cell_size;
@@ -87,22 +98,26 @@ public class Building {
         var variables:URLVariables = new URLVariables();
         variables.x = _x;
         variables.y = _y;
-        HttpHelper.sendRequest2('http://localhost:4567/isBuildComplete', variables, function(data) {
-            state = "Готов к сбору";
-            redraw();
-            sprite.addEventListener(MouseEvent.CLICK, getProfit);
+        HttpHelper.sendRequest('http://localhost:4567/isBuildComplete', variables, function(data) {
+            if (data=="true") {
+                state = "Готов к сбору";
+                redraw();
+                sprite.addEventListener(MouseEvent.CLICK, getProfit);
+            }
+            else {
+                Global.errors.text = "Построение не заверешено"
+            }
         });
 
     }
 
     public function getProfit(event:MouseEvent):void {
-
     }
-
 
     public function  remove(index:int):void {
         scene.field_sprite.removeChild(sprite);
         scene.buildings.slice(index,1);
+        timer.reset();
     }
 
     public function move(index,new_x,new_y):void {

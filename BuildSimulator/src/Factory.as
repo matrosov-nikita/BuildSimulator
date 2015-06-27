@@ -44,19 +44,9 @@ public class Factory extends Building {
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
     }
 
-    private function launchTimer():void {
+    public override function launchTimer():void {
         if (contract!=0) {
-            var repCount:int = time;
-            if (repCount==0)
-            {
-                ready();
-            }
-            else {
-                trace(time);
-                timer.repeatCount =repCount;
-                state="В работе";
-                timer.start();
-            }
+            super.launchTimer();
         }
     }
 
@@ -74,9 +64,8 @@ public class Factory extends Building {
 
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
-            variables.y=_y;
-            HttpHelper.sendRequest2('http://localhost:4567/getFactoryIncome', variables,function(data) {
-                trace(data);
+            variables.y = _y;
+            HttpHelper.sendRequest('http://localhost:4567/getFactoryIncome', variables,function(data) {
                 if (data=="true") {
                     timer.reset();
                     time = 0;
@@ -87,12 +76,13 @@ public class Factory extends Building {
                     sprite.addEventListener(MouseEvent.CLICK, chooseContract);
                     visible_contract = false;
                 }
+                else {
+                    Global.errors.text = "Не удалось собрать прибыль с фабрики";
+                }
             });
         }
         Global.userOperation = false;
     }
-
-
 
     private function chooseContract(event:MouseEvent):void {
 
@@ -115,31 +105,37 @@ public class Factory extends Building {
 
     private function chooseContract1(event:MouseEvent):void {
 
-        if (scene.coins>=cost_launch_contract1) {
-            Global.coins.text = "Coins: " + (scene.coins-=cost_launch_contract1).toString();
             clearContractButtons();
             startContract(1);
-        }
     }
 
     private function chooseContract2(event:MouseEvent):void {
 
-        if (scene.coins>=cost_launch_contract2) {
-            Global.coins.text = "Coins: " + (scene.coins-=cost_launch_contract2).toString();
             clearContractButtons();
             startContract(2);
-        }
     }
     private function  startContract( number:int):void {
         var variables:URLVariables = new URLVariables();
         variables.contract=number;
         variables.x = _x;
         variables.y=_y;
-        HttpHelper.sendRequest2('http://localhost:4567/startContract', variables,function(data) {
-            contract = number;
-            time = (contract==1)?time_contract1:time_contract2;
-            launchTimer();
-            drawContract();
+        HttpHelper.sendRequest('http://localhost:4567/startContract', variables,function(data) {
+            if (data=="true") {
+                contract = number;
+                if (contract == 1) {
+                    time = time_contract1;
+                    Global.coins.text = "Coins: " + (scene.coins -= cost_launch_contract1).toString();
+                }
+                else {
+                    time = time_contract2;
+                    Global.coins.text = "Coins: " + (scene.coins -= cost_launch_contract2).toString();
+                }
+                launchTimer();
+                drawContract();
+            }
+            else {
+                Global.coins.text = "Не удалось запустить контракт";
+            }
         });
     }
 

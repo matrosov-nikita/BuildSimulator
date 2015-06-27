@@ -7,7 +7,7 @@ import flash.display.StageAlign;
 import flash.display.StageScaleMode;
 
 public class Main extends  Sprite{
-    var  field:Field;
+   public var  field:Field;
     public function Main() {
 
 
@@ -16,7 +16,7 @@ public class Main extends  Sprite{
 
 
             field = new Field(stage);
-            HttpHelper.sendRequest2('http://localhost:4567/getField',null, function(data){
+            HttpHelper.sendRequest('http://localhost:4567/getField',null, function(data){
                 trace(data);
                 var xml:XML = XML(data);
                 if (xml.name()=="field")
@@ -27,6 +27,7 @@ public class Main extends  Sprite{
             Global.coins.text = "Coins: " + field.coins;
             Global.coins.selectable=false;
             addChild(Global.coins);
+        addChild(Global.errors);
 
 
     }
