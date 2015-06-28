@@ -31,6 +31,7 @@ public class Workshop extends Building {
                     timer.reset();
                     time = time_working;
                     launchTimer();
+                   Global. clearErrorField();
                 }
                 else {
                     Global.error_field.text = Global.state["profitFactory"];

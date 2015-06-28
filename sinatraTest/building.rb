@@ -119,7 +119,7 @@ class Building
   end
 
   def getShopIncome x,y
-    if  existBuilding(x,y)
+    if  existBuilding(x,y) && isBuildComplete(x,y)
       get_shop_income(x,y)
       increaseCoins SHOP_INCOME
       return true
@@ -129,7 +129,7 @@ class Building
 
   def getFactoryIncome x,y
 
-    if existContract(x,y)
+    if existContract(x,y) && isBuildComplete(x,y)
       contract = getContract(x,y).to_i
       profit = getProfitByContract(contract)
       increaseCoins profit
@@ -159,8 +159,6 @@ class Building
 
   def generateXMLByTable
     coins = getCoins
-    p "COINS"
-    p coins
     resultString = "<field coins='#{coins}'>"
     buildings = get_all_buildings()
     buildings.each do |r|

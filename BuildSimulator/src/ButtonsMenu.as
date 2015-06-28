@@ -15,13 +15,14 @@ import flash.ui.Mouse;
 import flash.utils.Dictionary;
 
 public class ButtonsMenu {
-    public const button_width:int = 57;
-    public const button_height:int=20;
+    public static const button_width:int = 57;
+    public static const button_height:int=20;
+    public static const button_offset:int = 10;
+    public static const count_buttons:int=4;
     public const cell_size:int = 50;
     public const cost_workshop:int=20;
     public const cost_factory:int=30;
     public const button_font_size:int=13;
-    public const button_offset:int = 10;
     public const cursor_for_shop:String ="http://localhost:4567/auto_workshop.png";
     public const cursor_for_factory:String="http://localhost:4567/factory.png";
     public const path_add_building = "http://localhost:4567/addBuilding";
@@ -42,29 +43,14 @@ public class ButtonsMenu {
     public function ButtonsMenu(field:Field, stage:Stage) {
         this.field=field;
         this.stage=stage;
-        setCoinsLabel();
-        setErrorsLabel();
+        Global.setCoinsLabel();
+        Global.setErrorsLabel();
         setButtonList();
-    }
-
-    private function setErrorsLabel():void {
-        Global.error_field.x = this.field.field_width+button_offset;
-        Global.error_field.y = (buttons.length+1)*button_height;
-        Global.error_field.width=150;
-        Global.error_field.textColor= 0xFF0000;
-        Global.error_field.wordWrap=true;
-    }
-    private function setCoinsLabel():void {
-        Global.coins.x = this.field.field_width+button_offset;
-        Global.coins.y = field.field_height;
-        Global.coins.border=true;
-        Global.coins.borderColor=0xCCFF00;
-        Global.coins.height = button_height;
     }
 
     private  function setButtonList():void {
         for (var i:int=0; i < names_button.length; i++) {
-            buttons[i] = new MyButton(this.field.field_width+button_offset,i*button_height,button_width,button_height,names_button[i],myformat);
+            buttons[i] = new MyButton(Field.field_width+button_offset,i*button_height,button_width,button_height,names_button[i],myformat);
             buttons[i].addEventListener(MouseEvent.CLICK,listeners[i]);
             stage.addChild(buttons[i]);
         }
@@ -107,6 +93,7 @@ public class ButtonsMenu {
                            var time:int = (type!="factory")?Workshop.time_working:0;
                            field.addBuidling(type,x,y,time,0);
                            Global.coins.text = "Coins: " + (field.coins -= cost).toString();
+                          Global. clearErrorField();
                        }
                         else
                        {
@@ -132,8 +119,8 @@ public class ButtonsMenu {
                     new Rectangle(
                             -field.buildings[search_index]._x*cell_size-cell_size,
                             -field.buildings[search_index]._y*cell_size-cell_size,
-                            field.field_width,
-                            field.field_height));
+                            Field.field_width,
+                            Field.field_height));
             field.buildings[search_index].sprite.addEventListener(MouseEvent.MOUSE_UP,up);
         }
     }
@@ -144,13 +131,13 @@ public class ButtonsMenu {
         var _y:int = event.target.y / cell_size;
         if (insideField(event.stageX, event.stageY)) {
             var search_index:int = field.findBuilding(_x, _y);
+            var new_x:Number = Math.floor(stage.mouseX / cell_size);
+            var new_y:Number = Math.floor(stage.mouseY / cell_size);
             event.currentTarget.stopDrag();
+            field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
             for (var i:int = 0; i < field.buildings.length; i++) {
                 field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
             }
-            field.buildings[search_index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
-            var new_x:Number = Math.floor(stage.mouseX / cell_size);
-            var new_y:Number = Math.floor(stage.mouseY / cell_size);
             var variables:URLVariables = new URLVariables();
             variables.new_x = new_x;
             variables.new_y = new_y;
@@ -159,8 +146,10 @@ public class ButtonsMenu {
             HttpHelper.sendRequest(path_move_building, variables,function(data) {
                 if (data=="true") {
                     field.buildings[search_index].move(search_index,new_x,new_y);
+                   Global. clearErrorField();
                 }
                 else {
+                    field.buildings[search_index].move(search_index,_x,_y);
                     Global.error_field.text = Global.error_array["move"]
                 }
             });
@@ -188,6 +177,7 @@ public class ButtonsMenu {
                   field.buildings[search_building].remove(search_building);
                   var compensation:int = ((field.buildings[search_building].build_type=="factory")?cost_factory/2:cost_workshop/2);
                   Global.coins.text = "Coins: " + (field.coins+=compensation).toString();
+                 Global. clearErrorField();
               }
                 else {
                   Global.error_field.text = Global["remove"];
@@ -196,13 +186,13 @@ public class ButtonsMenu {
     }
 
     private function insideField(x:int, y:int):Boolean {
-        var w:Number = 0.8556*field.field_width;
-        var h:Number = 0.7492*field.field_height;
+        var w:Number = 0.8556*Field.field_width;
+        var h:Number = 0.7492*Field.field_height;
         var a:Number= 0.5*w;
         var b:Number = 0.5*h;
-        var centerX:Number = field.field_width/2;
-        var centerY:Number = field.field_height/2;
-        return Math.abs(x-centerX)/a+Math.abs(y-centerY)/b<=0.9;
+        var centerX:Number = Field.field_width/2;
+        var centerY:Number = Field.field_height/2;
+        return Math.abs(x-centerX)/a+Math.abs(y-centerY)/b<=0.8;
 
     }
 }

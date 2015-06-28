@@ -35,11 +35,13 @@ get '/removeBuilding' do
 end
 
 get '/moveBuilding' do
+
   x = params['x']
   y = params['y']
   new_x = params['new_x']
   new_y = params['new_y']
-  if valid_numbers(x,y)
+  p x,y,new_x,new_y
+  if valid_numbers(x,y,new_x,new_y)
     return Building.instance.move(x,y,new_x,new_y).to_s
   end
   "false"

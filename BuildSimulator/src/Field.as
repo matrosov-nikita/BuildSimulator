@@ -3,8 +3,8 @@ import flash.display.Sprite;
 import flash.display.Stage;
 
 public class Field {
-    public const field_width:int = 550;
-    public const field_height:int = 350;
+    public static const field_width:int = 550;
+    public static const field_height:int = 350;
     public const start_coins:int = 70;
     public const path:String = "http://localhost:4567/field.jpg";
     public var buildings:Array;

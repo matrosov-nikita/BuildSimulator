@@ -68,6 +68,7 @@ public class Factory extends Building {
                         Global.coins.text = "Coins: " + (scene.coins+=profit_contract2).toString();
                     }
                     resetFactoryProperties();
+                   Global. clearErrorField();
                 }
                 else {
                     Global.error_field.text = Global.error_array["profitFactory"];
@@ -136,6 +137,7 @@ public class Factory extends Building {
                 }
                 launchTimer();
                 drawContract();
+               Global. clearErrorField();
             }
             else {
                 Global.error_field.text = Global.state["startContract"];
@@ -154,7 +156,7 @@ public class Factory extends Building {
             sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            contract_sprite = new Viewer(path_contract1,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
+            contract_sprite = new Viewer(path_contract2,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
             sprite.addChild(contract_sprite);
         }
     }

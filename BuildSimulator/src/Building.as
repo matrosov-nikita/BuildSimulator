@@ -94,21 +94,30 @@ public class Building {
         redraw();
     }
     public function ready(event:TimerEvent=null):void {
-        var variables:URLVariables = new URLVariables();
-        variables.x = _x;
-        variables.y = _y;
-        HttpHelper.sendRequest(path_is_build, variables, function(data) {
-            if (data=="true") {
-                state = Global.state["ready"];
-                redraw();
-                sprite.addEventListener(MouseEvent.CLICK, getProfit);
-            }
-            else {
-                Global.error_field.text = Global.error_array["isBuild"];
-            }
-        });
+        if (time==0)
+        {
+            foo()
+        }
+        else {
+            var variables:URLVariables = new URLVariables();
+            variables.x = _x;
+            variables.y = _y;
+            HttpHelper.sendRequest(path_is_build, variables, function (data) {
+                if (data == "true") {
+                    foo();
+                }
+                else {
+                    Global.error_field.text = Global.error_array["isBuild"];
+                }
+            });
+        }
     }
 
+    public function foo():void {
+        state = Global.state["ready"];
+        redraw();
+        sprite.addEventListener(MouseEvent.CLICK, getProfit);
+    }
     public function getProfit(event:MouseEvent):void {
     }
 

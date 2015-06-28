@@ -17,7 +17,7 @@ public class CustomCursor extends  Sprite{
             var coordX:int = event.stageX;
             var coordY:int = event.stageY;
 
-            if (coordX >= 0 && coordY >= 0 && coordX <= field.field_width-width_cursor && coordY <= field.field_height-height_cursor)
+            if (coordX >= 0 && coordY >= 0 && coordX <= Field.field_width-width_cursor && coordY <= Field.field_height-height_cursor)
             {
                 cur.visible = true;
                 cur.x = coordX;
