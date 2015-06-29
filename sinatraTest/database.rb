@@ -34,7 +34,7 @@ def get_timework_contract contract
   @@conn.exec("select time_work from contracts where contract_id=#{contract}")
 end
 
-def exist x,y
+def exist
   @@conn.exec("select x,y from buildings ")
 end
 

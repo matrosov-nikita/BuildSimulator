@@ -8,7 +8,7 @@ class Building
   SHOP_TIME_WORKING=300
 
     def existBuilding x,y
-       exist(x,y).each  do |result|
+       exist.each  do |result|
            if result['x']==x.to_s && result['y']==y.to_s
              return true
            end
