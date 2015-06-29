@@ -11,7 +11,11 @@ def valid_numbers(*array_of_numbers)
 end
 
 def valid_string(*array_of_string)
-  array_of_string.each{ |el| return false if !check_type(el)}
+  types = Array.new
+  check_type.each { |t| types << t["type"] }
+  array_of_string.each do |el|
+     return false unless types.include? el
+    end
   true
 end
 
@@ -40,13 +44,11 @@ get '/moveBuilding' do
   y = params['y']
   new_x = params['new_x']
   new_y = params['new_y']
-  p x,y,new_x,new_y
   if valid_numbers(x,y,new_x,new_y)
     return Building.instance.move(x,y,new_x,new_y).to_s
   end
   "false"
 end
-
 
 get '/startContract' do
   x = params['x']
@@ -73,8 +75,6 @@ get '/isBuildComplete' do
   "false"
 end
 
-
-
 get '/getShopIncome' do
   x = params['x']
   y = params['y']
@@ -83,7 +83,6 @@ get '/getShopIncome' do
   end
   "false"
 end
-
 
 get '/getFactoryIncome' do
   x = params['x']

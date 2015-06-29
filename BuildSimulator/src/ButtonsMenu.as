@@ -23,6 +23,9 @@ public class ButtonsMenu {
     public const cost_workshop:int=20;
     public const cost_factory:int=30;
     public const button_font_size:int=13;
+    public const coeff1:Number = 0.8556;
+    public const coeff2:Number = 0.7492;
+
     public const cursor_for_shop:String ="http://localhost:4567/auto_workshop.png";
     public const cursor_for_factory:String="http://localhost:4567/factory.png";
     public const path_add_building = "http://localhost:4567/addBuilding";
@@ -184,16 +187,15 @@ public class ButtonsMenu {
               }
             });
     }
-
+    //dummy to enter into field
     private function insideField(x:int, y:int):Boolean {
-        var w:Number = 0.8556*Field.field_width;
-        var h:Number = 0.7492*Field.field_height;
+        var w:Number = coeff1*Field.field_width;
+        var h:Number = coeff2*Field.field_height;
         var a:Number= 0.5*w;
         var b:Number = 0.5*h;
         var centerX:Number = Field.field_width/2;
         var centerY:Number = Field.field_height/2;
         return Math.abs(x-centerX)/a+Math.abs(y-centerY)/b<=0.8;
-
     }
 }
 }

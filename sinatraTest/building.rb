@@ -169,7 +169,6 @@ class Building
         end
       end
       resultString+="</field>"
-    p resultString
       resultString
     end
 end

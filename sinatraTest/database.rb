@@ -20,11 +20,9 @@ def update_building hash
                        values('#{hash["type"]}',#{hash["x"]},#{hash["y"]},#{hash["contract"]},'#{hash["time"]}');")
 end
 
-
 def get_contract x,y
   @@conn.exec("select contract from buildings where x=#{x} and y=#{y}")
 end
-
 
 def get_cost_contract contract
   @@conn.exec("select cost from contracts where contract_id=#{contract}")
@@ -40,20 +38,13 @@ def exist x,y
   @@conn.exec("select x,y from buildings ")
 end
 
-
 def get_coins
-  p @@conn.exec("select coins from fields")
   @@conn.exec("select coins from fields")
 end
 
 
-def check_type type
-  @@conn.exec("select type from build_cost") do |result|
-    result.each do |r|
-      return true if r["type"]==type
-    end
-    end
-    false
+def check_type
+  @@conn.exec("select type from build_cost")
 end
 
 def get_type x,y
