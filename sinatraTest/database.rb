@@ -12,7 +12,7 @@ end
 @@conn = connect
 
 def get_all_buildings
-  @@conn.exec("select * from buildings")
+  yield @@conn.exec("select * from buildings") if block_given?
 end
 
 def update_building hash
@@ -24,27 +24,12 @@ def get_contract x,y
   @@conn.exec("select contract from buildings where x=#{x} and y=#{y}")
 end
 
-def get_cost_contract contract
-  @@conn.exec("select cost from contracts where contract_id=#{contract}")
-end
-def get_profit_contract contract
-  @@conn.exec("select profit from contracts where contract_id=#{contract}")
-end
-def get_timework_contract contract
-  @@conn.exec("select time_work from contracts where contract_id=#{contract}")
-end
-
 def exist
-  @@conn.exec("select x,y from buildings ")
+ yield @@conn.exec("select x,y from buildings ") if block_given?
 end
 
 def get_coins
   @@conn.exec("select coins from fields")
-end
-
-
-def check_type
-  @@conn.exec("select type from build_cost")
 end
 
 def get_type x,y
@@ -76,13 +61,6 @@ def get_shop_income x,y
 end
 def get_factory_income x,y
   @@conn.exec("update buildings set contract=#{0} where x=#{x} and y=#{y}")
-end
-
-def get_factory_cost
- @@conn.exec("select cost from build_cost where type='factory'")
-end
-def get_shop_cost
-@@conn.exec("select cost from build_cost where type='auto_workshop'")
 end
 
 def get_time x,y

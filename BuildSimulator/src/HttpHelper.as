@@ -4,7 +4,8 @@ import flash.net.URLLoader;
 import flash.net.URLRequest;
 import flash.net.URLVariables;
 
-public class HttpHelper {
+public class HttpHelper
+{
         public static function sendRequest(url:String, variables:URLVariables, func:Function):void {
             var request:URLRequest = new URLRequest(url);
             request.data = variables;

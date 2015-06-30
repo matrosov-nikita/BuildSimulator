@@ -8,19 +8,19 @@ import flash.display.StageScaleMode;
 
 public class Main extends  Sprite{
    public var  field:Field;
-    public const path_get_field:String ="http://localhost:4567/getField";
-    public function Main() {
+    public const PATH_GET_FIELD:String ="http://localhost:4567/getField";
+    public function Main()
+    {
             stage.align = StageAlign.TOP_LEFT;
-            //stage.scaleMode=StageScaleMode.NO_SCALE;
-            field = new Field(stage);
-            HttpHelper.sendRequest(path_get_field,null, function(data){
+            Global.field = new Field(stage);
+            HttpHelper.sendRequest(PATH_GET_FIELD,null, function(data){
                 var xml:XML = XML(data);
                 if (xml.name()=="field")
-                    field.getField(xml);
+                    Global.field.getField(xml);
             });
-            var menu:ButtonsMenu = new ButtonsMenu(field,stage);
-            Global.coins.text = field.coins.toString();
-            Global.coins.text = "Coins: " + field.coins;
+            var menu:ButtonsMenu = new ButtonsMenu(stage);
+            Global.coins.text =  Global.field.coins.toString();
+            Global.coins.text = "Coins: " +  Global.field.coins;
             Global.coins.selectable=false;
             addChild(Global.coins);
             addChild(Global.error_field);

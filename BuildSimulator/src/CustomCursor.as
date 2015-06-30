@@ -3,11 +3,11 @@ import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
 public class CustomCursor extends  Sprite{
-    public const width_cursor:int=50;
-    public const height_cursor:int=50;
+    public const WIDTH_CURSOR:int=50;
+    public const HEIGHT_CURSOR:int=50;
     public function CustomCursor(name:String, field:Field) {
        var cur:Sprite = new Sprite();
-        cur.addChild(new Viewer(name,0,0,width_cursor,height_cursor));
+        cur.addChild(new Viewer(name,0,0,WIDTH_CURSOR,HEIGHT_CURSOR));
         addChild(cur);
         field.field_sprite.addChild(this);
         cur.visible=false;
@@ -17,7 +17,7 @@ public class CustomCursor extends  Sprite{
             var coordX:int = event.stageX;
             var coordY:int = event.stageY;
 
-            if (coordX >= 0 && coordY >= 0 && coordX <= Field.field_width-width_cursor && coordY <= Field.field_height-height_cursor)
+            if (coordX >= 0 && coordY >= 0 && coordX <= Field.FIELD_WIDTH-WIDTH_CURSOR && coordY <= Field.FIELD_HEIGHT-HEIGHT_CURSOR)
             {
                 cur.visible = true;
                 cur.x = coordX;

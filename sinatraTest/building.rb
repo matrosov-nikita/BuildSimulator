@@ -1,19 +1,20 @@
 require 'singleton'
 require_relative 'database'
+require_relative 'conf'
 
 
 class Building
   include Singleton
-  SHOP_INCOME = 10
-  SHOP_TIME_WORKING=300
+
+  @@config=Conf.class_variable_get(:@@contract)
 
     def existBuilding x,y
-       exist.each  do |result|
-           if result['x']==x.to_s && result['y']==y.to_s
-             return true
-           end
-         end
-       false
+      exist do |res|
+        res.each do |result|
+          return true if result['x']==x.to_s && result['y']==y.to_s
+        end
+        false
+      end
     end
 
     def getCoins
@@ -36,15 +37,15 @@ class Building
     end
 
     def existContract x,y
-      (1..2).include?(getContract(x,y).to_i)
+      (@@config.keys[1]..@@config.keys[2]).include?(getContract(x,y).to_i)
     end
 
     def getShopCost
-       get_shop_cost[0]['cost'].to_i
+      Conf.class_variable_get(:@@buildings)["auto_workshop"]
     end
 
     def getFactoryCost
-       get_factory_cost[0]['cost'].to_i
+      Conf.class_variable_get(:@@buildings)["factory"]
     end
 
     def getTypeBuilding x,y
@@ -52,15 +53,15 @@ class Building
     end
 
     def getCostByContract contract
-      get_cost_contract(contract)[0]['cost'].to_i
+      @@config[contract]["cost"]
     end
 
     def getProfitByContract contract
-      get_profit_contract(contract)[0]['profit'].to_i
+      @@config[contract]["profit"]
     end
 
     def getTimeWorkByContract contract
-      get_timework_contract(contract)[0]['time_work'].to_i
+      @@config[contract]["time_work"]
     end
 
     def getTime x,y
@@ -100,7 +101,7 @@ class Building
   end
 
   def startContract x,y,contract
-   cost = getCostByContract(contract)
+   cost = getCostByContract(contract.to_i)
   if  checkCoins(cost) && !existContract(x,y)
     start_contract(x,y,contract)
     decreaseCoins cost
@@ -109,26 +110,21 @@ class Building
   false
   end
 
-
   def isBuildComplete x,y
-    time = Time.now - Time.parse(getTime(x,y))
-    if time+1 >= getWorkTime(getContract(x,y))
-      return true
-    end
-    false
+      time = Time.now - Time.parse(getTime(x,y))
+      time+1 >= getWorkTime(getContract(x,y))
   end
 
   def getShopIncome x,y
     if  existBuilding(x,y) && isBuildComplete(x,y)
       get_shop_income(x,y)
-      increaseCoins SHOP_INCOME
+      increaseCoins @@config[nil]["profit"]
       return true
     end
     false
   end
 
   def getFactoryIncome x,y
-
     if existContract(x,y) && isBuildComplete(x,y)
       contract = getContract(x,y).to_i
       profit = getProfitByContract(contract)
@@ -140,9 +136,7 @@ class Building
   end
 
   def getWorkTime contract
-    if (contract==nil)
-      return SHOP_TIME_WORKING
-    end
+    return @@config[nil]["time_work"] if (contract==nil)
     getTimeWorkByContract contract.to_i
   end
 
@@ -160,16 +154,17 @@ class Building
   def generateXMLByTable
     coins = getCoins
     resultString = "<field coins='#{coins}'>"
-    buildings = get_all_buildings()
-    buildings.each do |r|
+    get_all_buildings do |result|
+      result.each do |r|
         if (r['type']!="factory")
-          resultString+="<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
+          resultString<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
         else
-          resultString+="<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
+          resultString<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
         end
       end
-      resultString+="</field>"
+      resultString<<"</field>"
       resultString
+    end
     end
 end
 

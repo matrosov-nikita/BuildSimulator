@@ -9,63 +9,64 @@ import flash.net.URLVariables;
 import flash.text.TextFormat;
 import flash.utils.Timer;
 public class Factory extends Building {
-    public static const time_contract1:int = 300;
-    public static const time_contract2:int = 900;
-    public const profit_contract1:int=30;
-    public const profit_contract2:int=50;
-    public const cost_launch_contract1:int=5;
-    public const cost_launch_contract2:int=10;
-    public const width_button_contract:int=20;
-    public const height_button_contract:int=15;
-    public const offset_button_contract:int=21;
-    public const width_contract_image:int = 15;
-    public const height_contract_image:int = 15;
-    public const name_button_contract1:String="К1";
-    public const name_button_contract2:String="К2";
-    public const path_factory:String = "http://localhost:4567/factory.png";
-    public const path_contract1:String = "http://localhost:4567/contract_1.png";
-    public const path_contract2:String = "http://localhost:4567/contract_2.png";
-    public const path_start_contract:String  = "http://localhost:4567/startContract";
-    public const path_get_factory_income:String = "http://localhost:4567/getFactoryIncome";
+    public static const COST_FACTORY:int=30;
+    public static const TIME_CONTRACT1:int = 300;
+    public static const TIME_CONTRACT2:int = 900;
+    public const PROFIT_CONTRACT1:int=30;
+    public const PROFIT_CONTRACT2:int=50;
+    public const COST_LAUNCH_CONTRACT1:int=5;
+    public const COST_LAUNCH_CONTRACT2:int=10;
+    public const WIDTH_BUTTON_CONTRACT:int=20;
+    public const HEIGHT_BUTTON_CONTRACT:int=15;
+    public const OFFSET_BUTTON_CONTRACT:int=21;
+    public const WIDTH_CONTRACT_IMAGE:int = 15;
+    public const HEIGHT_CONTRACT_IMAGE:int = 15;
+    public const NAME_BUTTON_CONTRACT1:String="К1";
+    public const NAME_BUTTON_CONTRACT2:String="К2";
+    public const PATH_START_CONTRACT:String  = "http://localhost:4567/startContract";
+    public const PATH_GET_FACTORY_INCOME:String = "http://localhost:4567/getFactoryIncome";
     public var contract:int;
     var contract1:Sprite;
     var contract2:Sprite;
     var contract_sprite:Sprite;
     var visible_contract:Boolean = false;
 
-    public function Factory(_x:Number, _y:Number, scene:Field,time:int, contract:int) {
-        super(_x, _y, scene,time, contract);
-        path=path_factory;
+    public function Factory(_x:Number, _y:Number,time:int, contract:int)
+    {
+        super(_x, _y,time, contract);
+        path=Global.PATH_FACTORY;
         build_type="factory";
         this.contract = contract;
         if (contract==0) {
             sprite.addEventListener(MouseEvent.CLICK, chooseContract);
         }
-        timer = new Timer(Global.time_tick);
+        timer = new Timer(Global.TIME_TICK);
         launchTimer();
         timer.addEventListener(TimerEvent.TIMER, tick);
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
     }
 
-    public override function launchTimer():void {
+    public override function launchTimer():void
+    {
         if (contract!=0) {
             super.launchTimer();
         }
     }
 
-    public override function getProfit(event:MouseEvent):void {
+    public override function getProfit(event:MouseEvent):void
+    {
         if (Global.userOperation==false) {
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
-            HttpHelper.sendRequest(path_get_factory_income, variables,function(data) {
+            HttpHelper.sendRequest(PATH_GET_FACTORY_INCOME, variables,function(data) {
                 if (data=="true") {
                     if (contract == 1) {
-                        Global.coins.text = "Coins: " + (scene.coins+=profit_contract1).toString();
+                        Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT_CONTRACT1).toString();
                     }
                     else {
-                        Global.coins.text = "Coins: " + (scene.coins+=profit_contract2).toString();
+                        Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT_CONTRACT2).toString();
                     }
                     resetFactoryProperties();
                    Global. clearErrorField();
@@ -78,7 +79,8 @@ public class Factory extends Building {
         Global.userOperation = false;
     }
 
-    private function resetFactoryProperties():void {
+    private function resetFactoryProperties():void
+    {
         timer.reset();
         time = 0;
         contract = 0;
@@ -89,14 +91,15 @@ public class Factory extends Building {
         visible_contract = false;
     }
 
-    private function chooseContract(event:MouseEvent):void {
+    private function chooseContract(event:MouseEvent):void
+    {
 
         if (contract==0 && Global.userOperation==false && !visible_contract ) {
             var myFormat:TextFormat = new TextFormat("Georgia",7);
             contract1 = new Sprite();
             contract2 = new Sprite();
-            var btn1:MyButton = new MyButton(_x * cell_size, _y * cell_size, width_button_contract, height_button_contract, name_button_contract1, myFormat);
-            var btn2:MyButton = new MyButton(_x * cell_size + offset_button_contract, _y * cell_size, width_button_contract, height_button_contract, name_button_contract2, myFormat);
+            var btn1:MyButton = new MyButton(_x * Global.CELL_SIZE, _y * Global.CELL_SIZE, WIDTH_BUTTON_CONTRACT, HEIGHT_BUTTON_CONTRACT, NAME_BUTTON_CONTRACT1, myFormat);
+            var btn2:MyButton = new MyButton(_x * Global.CELL_SIZE + OFFSET_BUTTON_CONTRACT, _y * Global.CELL_SIZE, WIDTH_BUTTON_CONTRACT, HEIGHT_BUTTON_CONTRACT, NAME_BUTTON_CONTRACT2, myFormat);
             contract1.addChild(btn1);
             contract2.addChild(btn2);
             sprite.addChild(contract1);
@@ -108,32 +111,34 @@ public class Factory extends Building {
         Global.userOperation=false;
     }
 
-    private function chooseContract1(event:MouseEvent):void {
-
+    private function chooseContract1(event:MouseEvent):void
+    {
             clearContractButtons();
             startContract(1);
     }
 
-    private function chooseContract2(event:MouseEvent):void {
-
+    private function chooseContract2(event:MouseEvent):void
+    {
             clearContractButtons();
             startContract(2);
     }
-    private function  startContract( number:int):void {
+
+    private function  startContract( number:int):void
+    {
         var variables:URLVariables = new URLVariables();
         variables.contract=number;
         variables.x = _x;
         variables.y=_y;
-        HttpHelper.sendRequest(path_start_contract, variables,function(data) {
+        HttpHelper.sendRequest(PATH_START_CONTRACT, variables,function(data) {
             if (data=="true") {
                 contract = number;
                 if (contract == 1) {
-                    time = time_contract1;
-                    Global.coins.text = "Coins: " + (scene.coins -= cost_launch_contract1).toString();
+                    time = TIME_CONTRACT1;
+                    Global.coins.text = "Coins: " + ( Global.field.coins -= COST_LAUNCH_CONTRACT1).toString();
                 }
                 else {
-                    time = time_contract2;
-                    Global.coins.text = "Coins: " + (scene.coins -= cost_launch_contract2).toString();
+                    time = TIME_CONTRACT2;
+                    Global.coins.text = "Coins: " + ( Global.field.coins -= COST_LAUNCH_CONTRACT2).toString();
                 }
                 launchTimer();
                 drawContract();
@@ -145,33 +150,38 @@ public class Factory extends Building {
         });
     }
 
-    public override  function draw():void {
+    public override  function draw():void
+    {
         drawContract();
         super.draw();
     }
 
-    private function drawContract():void {
+    private function drawContract():void
+    {
         if (contract==1) {
-            contract_sprite = new Viewer(path_contract1,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
+            contract_sprite = new Viewer(Global.PATH_CONTRACT1,_x*Global.CELL_SIZE, _y*Global.CELL_SIZE,WIDTH_CONTRACT_IMAGE,HEIGHT_CONTRACT_IMAGE);
             sprite.addChild(contract_sprite);
         }
         else if (contract==2) {
-            contract_sprite = new Viewer(path_contract2,_x*cell_size, _y*cell_size,width_contract_image,height_contract_image);
+            contract_sprite = new Viewer(Global.PATH_CONTRACT2,_x*Global.CELL_SIZE, _y*Global.CELL_SIZE,WIDTH_CONTRACT_IMAGE,HEIGHT_CONTRACT_IMAGE);
             sprite.addChild(contract_sprite);
         }
     }
 
-    private function clearContract():void {
+    private function clearContract():void
+    {
         sprite.removeChild(contract_sprite);
     }
 
-    public override function move(index:int,new_x:int,new_y:int):void {
+    public override function move(index:int,new_x:int,new_y:int):void
+    {
         super.move(index,new_x,new_y);
          if (contract==0) sprite.addEventListener(MouseEvent.CLICK, chooseContract); else
              drawContract();
     }
 
-    private function clearContractButtons():void {
+    private function clearContractButtons():void
+    {
         sprite.removeEventListener(MouseEvent.CLICK, chooseContract);
         if  (sprite.contains(contract1))
           sprite.removeChild(contract1);
