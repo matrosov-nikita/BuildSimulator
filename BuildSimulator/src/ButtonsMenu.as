@@ -37,8 +37,8 @@ public class ButtonsMenu {
         Global.setCoinsLabel();
         Global.setErrorsLabel();
         setButtonList();
-        type_cost["factory"] = Factory.COST_FACTORY/2;
-        type_cost["auto_workshop"] = Workshop.COST_WORKSHOP/2;
+        type_cost["factory"] = Factory.COST_FACTORY;
+        type_cost["auto_workshop"] = Workshop.COST_WORKSHOP;
     }
 
     private  function setButtonList():void
@@ -185,7 +185,7 @@ public class ButtonsMenu {
             successRemove(search_building);
             HttpHelper.sendRequest(PATH_REMOVE_BUILDING, variables, function(data) {
               if (data=="false") {
-                  Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]).toString();
+                  Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]/2).toString();
                   dup_building.draw();
                   Global.error_field.text = Global["remove"];
               }
@@ -194,7 +194,7 @@ public class ButtonsMenu {
 
     private function successRemove(search_building:int):void {
         Global.field.buildings[search_building].remove(search_building);
-        Global.coins.text = "Coins: " + ( Global.field.coins+=type_cost[Global.field.buildings[search_building].build_type]).toString();
+        Global.coins.text = "Coins: " + ( Global.field.coins+=type_cost[Global.field.buildings[search_building].build_type]/2).toString();
         Global. clearErrorField();
     }
 
