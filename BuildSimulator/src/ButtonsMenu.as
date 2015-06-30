@@ -20,6 +20,7 @@ public class ButtonsMenu {
     public const PATH_REMOVE_BUILDING:String = "http://localhost:4567/removeBuilding";
     var myformat:TextFormat = new TextFormat("Georgia",BUTTON_FONT_SIZE);
     var names_button = ["Shop","Factory","Move","Remove"];
+    var type_cost:Array=[]
     var btnAddShop:MyButton;
     var btnAddFactory:MyButton;
     var btnMove:MyButton;
@@ -36,6 +37,8 @@ public class ButtonsMenu {
         Global.setCoinsLabel();
         Global.setErrorsLabel();
         setButtonList();
+        type_cost["factory"] = Factory.COST_FACTORY/2;
+        type_cost["auto_workshop"] = Workshop.COST_WORKSHOP/2;
     }
 
     private  function setButtonList():void
@@ -52,7 +55,7 @@ public class ButtonsMenu {
             Mouse.hide();
             var p:String =Global.CURSOR_FOR_SHOP ;
             cursor =  new CustomCursor(p, Global.field);
-            functiononClick = createBuilding("auto_workshop",Workshop.COST_WORKSHOP);
+            functiononClick = createBuilding("auto_workshop",type_cost["auto_workshop"]);
             Global.field.field_sprite.addEventListener(MouseEvent.CLICK, functiononClick);
             Global.userOperation = true;
     }
@@ -62,7 +65,7 @@ public class ButtonsMenu {
             Mouse.hide();
             var p:String =Global.CURSOR_FOR_FACTORY ;
             cursor =  new CustomCursor(p, Global.field);
-            functiononClick = createBuilding("factory",Factory.COST_FACTORY);
+            functiononClick = createBuilding("factory",type_cost["factory"]);
             Global.field.field_sprite.addEventListener(MouseEvent.CLICK, functiononClick);
             Global.userOperation = true;
     }
@@ -82,21 +85,31 @@ public class ButtonsMenu {
                     variables.y = y;
                     variables.x = x;
                     variables.type = type;
+                    successAdd(x,y,type,cost);
                     HttpHelper.sendRequest(PATH_ADD_BUILDING, variables, function(data) {
-                       if (data=="true") {
-                           var time:int = (type!="factory")?Workshop.TIME_WORKING:0;
-                           Global.field.addBuidling(type,x,y,time,0);
-                           Global.coins.text = "Coins: " + ( Global.field.coins -= cost).toString();
-                          Global. clearErrorField();
-                       }
-                        else
+                       if (data=="false")
                        {
-                           Global.error_field.text=Global.error_array["add"];
+                           Global.coins.text = "Coins: " + ( Global.field.coins += cost).toString();
+                           wrongAdd();
                        }
                     });
                 }
             }
         }
+    }
+
+    public function  successAdd(x:int,y:int,type:String,cost:int):void
+    {
+        var time:int = (type!="factory")?Workshop.TIME_WORKING:0;
+        Global.field.addBuidling(type,x,y,time,0);
+        Global.coins.text = "Coins: " + ( Global.field.coins -= cost).toString();
+        Global. clearErrorField();
+    }
+    public function wrongAdd():void
+    {
+        var position:int =  Global.field.buildings.length-1;
+        Global.field.buildings[position].remove(position);
+        Global.error_field.text=Global.error_array["add"];
     }
 
     private function btnMoveListener(event:MouseEvent):void
@@ -130,7 +143,7 @@ public class ButtonsMenu {
             var new_y:Number = Math.floor(stage.mouseY / Global.CELL_SIZE);
             event.currentTarget.stopDrag();
             Global.field.buildings[index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
-            for (var i:int = 0; i <  Global.field.buildings.length; i++) {
+            for (var i:int = 0; i < Global.field.buildings.length; i++) {
                 Global.field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
             }
             var variables:URLVariables = new URLVariables();
@@ -138,17 +151,17 @@ public class ButtonsMenu {
             variables.new_y = new_y;
             variables.x = _x;
             variables.y = _y;
+            Global.field.buildings[index].move(index, new_x, new_y);
+            Global.clearErrorField();
+        }
             HttpHelper.sendRequest(PATH_MOVE_BUILDING, variables,function(data) {
-                if (data=="true") {
-                    Global.field.buildings[index].move(index,new_x,new_y);
-                   Global. clearErrorField();
-                }
-                else {
+                if (data=="false") {
                     Global.field.buildings[index].move(index,_x,_y);
                     Global.error_field.text = Global.error_array["move"]
                 }
             });
-        }
+
+
     }
 
     private function btnSellListener(event:MouseEvent):void
@@ -168,18 +181,23 @@ public class ButtonsMenu {
             var variables:URLVariables = new URLVariables();
             variables.x= Global.field.buildings[search_building]._x;
             variables.y= Global.field.buildings[search_building]._y;
+            var dup_building:Building = Building.clone(Global.field.buildings[search_building]) as Building;
+            successRemove(search_building);
             HttpHelper.sendRequest(PATH_REMOVE_BUILDING, variables, function(data) {
-              if (data=="true") {
-                  Global.field.buildings[search_building].remove(search_building);
-                  var compensation:int = (( Global.field.buildings[search_building].build_type=="factory")?Factory.COST_FACTORY/2:Workshop.COST_WORKSHOP/2);
-                  Global.coins.text = "Coins: " + ( Global.field.coins+=compensation).toString();
-                 Global. clearErrorField();
-              }
-                else {
+              if (data=="false") {
+                  Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]).toString();
+                  dup_building.draw();
                   Global.error_field.text = Global["remove"];
               }
             });
     }
+
+    private function successRemove(search_building:int):void {
+        Global.field.buildings[search_building].remove(search_building);
+        Global.coins.text = "Coins: " + ( Global.field.coins+=type_cost[Global.field.buildings[search_building].build_type]).toString();
+        Global. clearErrorField();
+    }
+
     //dummy to enter into field
     private function insideField(x:int, y:int):Boolean
     {

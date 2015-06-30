@@ -22,25 +22,31 @@ public class Workshop extends Building {
     public override  function getProfit(event:MouseEvent):void
     {
         if (Global.userOperation==false) {
-            Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT).toString();
+
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
 
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
+            successGetProfit();
             HttpHelper.sendRequest(PATH_WORKSHOP_INCOME, variables, function(data) {
-                if (data=="true") {
-                    timer.reset();
-                    time = TIME_WORKING;
-                    launchTimer();
-                   Global. clearErrorField();
-                }
-                else {
+                if (data=="false") {
+                    time=0;
+                    giveProfit();
                     Global.error_field.text = Global.state["profitFactory"];
                 }
             });
         }
         Global.userOperation=false;
+    }
+
+    public function successGetProfit():void
+    {
+        Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT).toString();
+        timer.reset();
+        time = TIME_WORKING;
+        launchTimer();
+        Global. clearErrorField();
     }
 
     public override function move(index:int,new_x:int,new_y:int):void

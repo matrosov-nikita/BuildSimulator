@@ -4,8 +4,10 @@ import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.net.URLVariables;
+import flash.net.registerClassAlias;
 import flash.text.TextField;
 import flash.text.TextFormat;
+import flash.utils.ByteArray;
 import flash.utils.Timer;
 public class Building {
     public const WIDTH_BUILDING:int=40;
@@ -95,7 +97,8 @@ public class Building {
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
-            HttpHelper.sendRequest(PATH_IS_BUILD, variables, function (data) {
+            HttpHelper.sendRequest(PATH_IS_BUILD, variables, function(data)
+            {
                 if (data == "true") {
                     giveProfit();
                 }
@@ -136,7 +139,15 @@ public class Building {
         sprite.addChild(t_state);
         Global.field.field_sprite.addChild(sprite);
         sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
+    }
 
+    public static function clone(source:Object):*
+    {
+        registerClassAlias("buildingTypeAlias",Building);
+        var copier:ByteArray = new ByteArray();
+        copier.writeObject(source);
+        copier.position = 0;
+        return(copier.readObject());
     }
 }
 }

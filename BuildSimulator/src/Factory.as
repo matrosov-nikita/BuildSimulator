@@ -10,12 +10,7 @@ import flash.text.TextFormat;
 import flash.utils.Timer;
 public class Factory extends Building {
     public static const COST_FACTORY:int=30;
-    public static const TIME_CONTRACT1:int = 300;
-    public static const TIME_CONTRACT2:int = 900;
-    public const PROFIT_CONTRACT1:int=30;
-    public const PROFIT_CONTRACT2:int=50;
-    public const COST_LAUNCH_CONTRACT1:int=5;
-    public const COST_LAUNCH_CONTRACT2:int=10;
+    public static const  CONTRACTS:Array = [];
     public const WIDTH_BUTTON_CONTRACT:int=20;
     public const HEIGHT_BUTTON_CONTRACT:int=15;
     public const OFFSET_BUTTON_CONTRACT:int=21;
@@ -44,6 +39,8 @@ public class Factory extends Building {
         launchTimer();
         timer.addEventListener(TimerEvent.TIMER, tick);
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
+        CONTRACTS[1] ={profit:30,cost:5,time_work:300};
+        CONTRACTS[2] = {profit:50,cost:10, time_work:900};
     }
 
     public override function launchTimer():void
@@ -60,23 +57,23 @@ public class Factory extends Building {
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
+            successGetProfit();
             HttpHelper.sendRequest(PATH_GET_FACTORY_INCOME, variables,function(data) {
-                if (data=="true") {
-                    if (contract == 1) {
-                        Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT_CONTRACT1).toString();
-                    }
-                    else {
-                        Global.coins.text = "Coins: " + ( Global.field.coins+=PROFIT_CONTRACT2).toString();
-                    }
-                    resetFactoryProperties();
-                   Global. clearErrorField();
-                }
-                else {
+                if (data=="false") {
+                    time=0;
+                    ready();
+                    Global.coins.text = "Coins: " + ( Global.field.coins-=CONTRACTS[contract]["profit"]).toString();
                     Global.error_field.text = Global.error_array["profitFactory"];
                 }
             });
         }
         Global.userOperation = false;
+    }
+
+    private function successGetProfit():void {
+        Global.coins.text = "Coins: " + ( Global.field.coins+=CONTRACTS[contract]["profit"]).toString();
+        resetFactoryProperties();
+        Global. clearErrorField();
     }
 
     private function resetFactoryProperties():void
@@ -93,7 +90,6 @@ public class Factory extends Building {
 
     private function chooseContract(event:MouseEvent):void
     {
-
         if (contract==0 && Global.userOperation==false && !visible_contract ) {
             var myFormat:TextFormat = new TextFormat("Georgia",7);
             contract1 = new Sprite();
@@ -129,25 +125,24 @@ public class Factory extends Building {
         variables.contract=number;
         variables.x = _x;
         variables.y=_y;
+        successStartContract(number);
         HttpHelper.sendRequest(PATH_START_CONTRACT, variables,function(data) {
-            if (data=="true") {
-                contract = number;
-                if (contract == 1) {
-                    time = TIME_CONTRACT1;
-                    Global.coins.text = "Coins: " + ( Global.field.coins -= COST_LAUNCH_CONTRACT1).toString();
-                }
-                else {
-                    time = TIME_CONTRACT2;
-                    Global.coins.text = "Coins: " + ( Global.field.coins -= COST_LAUNCH_CONTRACT2).toString();
-                }
-                launchTimer();
-                drawContract();
-               Global. clearErrorField();
-            }
-            else {
+            if (data=="false") {
+                resetFactoryProperties();
                 Global.error_field.text = Global.state["startContract"];
+                Global.coins.text = "Coins: " + ( Global.field.coins += CONTRACTS[contract]["cost"]).toString();
             }
         });
+    }
+
+    private function successStartContract(number:int):void
+    {
+        contract = number;
+        time = CONTRACTS[contract]["time_work"];
+        Global.coins.text = "Coins: " + ( Global.field.coins -= CONTRACTS[contract]["cost"]).toString();
+        launchTimer();
+        drawContract();
+        Global. clearErrorField();
     }
 
     public override  function draw():void
