@@ -38,8 +38,12 @@ end
 get '/removeBuilding' do
   x = params['x']
   y = params['y']
-  return Building.instance.remove(x,y).to_s if valid_numbers(x,y)
-  "false"
+   return Building.instance.remove(x,y).to_s if valid_numbers(x,y)
+  Building.instance.generateXMLByBuilding x,y
+end
+
+get '/generateXMLByBuilding' do
+  return Building.instance.generateXMLByBuilding(params['x'].to_i,params['y'].to_i)
 end
 
 get '/moveBuilding' do
@@ -50,7 +54,7 @@ get '/moveBuilding' do
   if valid_numbers(x,y,new_x,new_y) && valid_coordinates(new_x.to_i,new_y.to_i)
     return Building.instance.move(x,y,new_x,new_y).to_s
   end
-  "false"
+  Building.instance.generateXMLByBuilding(x,y)
 end
 
 get '/startContract' do
@@ -58,36 +62,34 @@ get '/startContract' do
   x = params['x']
   y = params['y']
   contract = params['contract']
-  if valid_numbers(x,y) && (config.keys[1]..config.keys[2]).include?(contract.to_i)
-    return Building.instance.startContract(x,y,contract).to_s
-  end
-  "false"
+   if valid_numbers(x,y) && (config.keys[1]..config.keys[2]).include?(contract.to_i)
+     return Building.instance.startContract(x,y,contract).to_s
+   end
+  Building.instance.generateXMLByBuilding x,y
 end
 
 get '/getField' do
   Building.instance.generateXMLByTable
 end
 
-
 get '/isBuildComplete' do
   x = params['x']
   y = params['y']
   return Building.instance.isBuildComplete(x,y).to_s  if valid_numbers(x,y)
-  "false"
 end
 
 get '/getShopIncome' do
   x = params['x']
   y = params['y']
   return Building.instance.getShopIncome(x,y).to_s if valid_numbers(x,y)
-  "false"
+  Building.instance.generateXMLByBuilding x,y
 end
 
 get '/getFactoryIncome' do
   x = params['x']
   y = params['y']
-  return Building.instance.getFactoryIncome(x,y).to_s if valid_numbers(x,y)
-  "false"
+   return Building.instance.getFactoryIncome(x,y).to_s if valid_numbers(x,y)
+  Building.instance.generateXMLByBuilding x,y
 end
 
 

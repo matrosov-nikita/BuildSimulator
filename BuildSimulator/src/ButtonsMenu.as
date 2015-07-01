@@ -101,7 +101,7 @@ public class ButtonsMenu {
     public function  successAdd(x:int,y:int,type:String,cost:int):void
     {
         var time:int = (type!="factory")?Workshop.TIME_WORKING:0;
-        Global.field.addBuidling(type,x,y,time,0);
+        Global.field.addBuilding(Global.field.getObject(type,x,y,time,0));
         Global.coins.text = "Coins: " + ( Global.field.coins -= cost).toString();
         Global. clearErrorField();
     }
@@ -153,15 +153,18 @@ public class ButtonsMenu {
             variables.y = _y;
             Global.field.buildings[index].move(index, new_x, new_y);
             Global.clearErrorField();
-        }
-            HttpHelper.sendRequest(PATH_MOVE_BUILDING, variables,function(data) {
-                if (data=="false") {
-                    Global.field.buildings[index].move(index,_x,_y);
-                    Global.error_field.text = Global.error_array["move"]
+            HttpHelper.sendRequest(PATH_MOVE_BUILDING, variables, function (data) {
+                if (data != "true") {
+                   Global.field.reCreateBuiling(index,XML(data));
+                    Global.error_field.text = Global.error_array["move"];
                 }
             });
-
-
+        }
+        else
+        {
+            Global.field.buildings[index].move(index, _x, _y);
+            Global.error_field.text = Global.error_array["move"];
+        }
     }
 
     private function btnSellListener(event:MouseEvent):void
@@ -181,15 +184,18 @@ public class ButtonsMenu {
             var variables:URLVariables = new URLVariables();
             variables.x= Global.field.buildings[search_building]._x;
             variables.y= Global.field.buildings[search_building]._y;
-            var dup_building:Building = Building.clone(Global.field.buildings[search_building]) as Building;
             successRemove(search_building);
             HttpHelper.sendRequest(PATH_REMOVE_BUILDING, variables, function(data) {
-              if (data=="false") {
-                  Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]/2).toString();
-                  dup_building.draw();
-                  Global.error_field.text = Global["remove"];
+              if (data!="true") {
+                wrongRemove(data,search_building)
               }
             });
+    }
+    private function wrongRemove(data:String,search_building:int):void
+    {
+        Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]/2).toString();
+        Global.field.addBuilding(Global.field.createBuidlingByXML(XML(data)));
+        Global.error_field.text = Global.error_array["remove"];
     }
 
     private function successRemove(search_building:int):void {

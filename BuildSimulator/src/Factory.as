@@ -59,10 +59,9 @@ public class Factory extends Building {
             variables.y = _y;
             successGetProfit();
             HttpHelper.sendRequest(PATH_GET_FACTORY_INCOME, variables,function(data) {
-                if (data=="false") {
-                    time=0;
-                    ready();
-                    Global.coins.text = "Coins: " + ( Global.field.coins-=CONTRACTS[contract]["profit"]).toString();
+                if (data!="true") {
+                    Global.field.reCreateBuiling(Global.field.findBuilding(_x,_y),XML(data));
+                    Global.coins.text = "Coins: " + ( Global.field.coins-=CONTRACTS[XML(data).@contract]["profit"]).toString();
                     Global.error_field.text = Global.error_array["profitFactory"];
                 }
             });
@@ -127,10 +126,10 @@ public class Factory extends Building {
         variables.y=_y;
         successStartContract(number);
         HttpHelper.sendRequest(PATH_START_CONTRACT, variables,function(data) {
-            if (data=="false") {
-                resetFactoryProperties();
-                Global.error_field.text = Global.state["startContract"];
-                Global.coins.text = "Coins: " + ( Global.field.coins += CONTRACTS[contract]["cost"]).toString();
+            if (data!="true") {
+                Global.field.reCreateBuiling(Global.field.findBuilding(_x,_y),XML(data));
+                Global.error_field.text = Global.error_array["startContract"];
+                Global.coins.text = "Coins: " + ( Global.field.coins += CONTRACTS[number]["cost"]).toString();
             }
         });
     }

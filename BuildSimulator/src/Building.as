@@ -1,5 +1,4 @@
 package {
-import flash.display.Bitmap;
 import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
@@ -97,12 +96,13 @@ public class Building {
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
+            giveProfit();
             HttpHelper.sendRequest(PATH_IS_BUILD, variables, function(data)
             {
-                if (data == "true") {
-                    giveProfit();
-                }
-                else {
+                if (data != "true") {
+                    time = (build_type=="factory")?Factory.CONTRACTS[this.contract]["time_working"]:Workshop.TIME_WORKING;
+                    timer.reset();
+                    launchTimer();
                     Global.error_field.text = Global.error_array["isBuild"];
                 }
             });
@@ -139,15 +139,6 @@ public class Building {
         sprite.addChild(t_state);
         Global.field.field_sprite.addChild(sprite);
         sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
-    }
-
-    public static function clone(source:Object):*
-    {
-        registerClassAlias("buildingTypeAlias",Building);
-        var copier:ByteArray = new ByteArray();
-        copier.writeObject(source);
-        copier.position = 0;
-        return(copier.readObject());
     }
 }
 }

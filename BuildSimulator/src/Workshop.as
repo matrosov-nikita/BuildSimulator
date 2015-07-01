@@ -30,10 +30,10 @@ public class Workshop extends Building {
             variables.y = _y;
             successGetProfit();
             HttpHelper.sendRequest(PATH_WORKSHOP_INCOME, variables, function(data) {
-                if (data=="false") {
-                    time=0;
-                    giveProfit();
-                    Global.error_field.text = Global.state["profitFactory"];
+                if (data!="true") {
+                    Global.field.reCreateBuiling(Global.field.findBuilding(_x,_y),XML(data));
+                    Global.coins.text = "Coins: " + ( Global.field.coins-=TIME_WORKING).toString();
+                    Global.error_field.text = Global.error_array["profitShop"];
                 }
             });
         }

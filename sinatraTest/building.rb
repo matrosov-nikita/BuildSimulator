@@ -89,7 +89,7 @@ class Building
       remove_building(x,y)
       return true
       end
-    false
+    generateXMLByBuilding x,y
   end
 
   def move x,y,new_x,new_y
@@ -97,7 +97,7 @@ class Building
       move_building x,y,new_x,new_y
       return true
     end
-    false
+    generateXMLByBuilding x,y
   end
 
   def startContract x,y,contract
@@ -107,7 +107,7 @@ class Building
     decreaseCoins cost
     return true
   end
-  false
+   generateXMLByBuilding x,y
   end
 
   def isBuildComplete x,y
@@ -121,7 +121,7 @@ class Building
       increaseCoins @@config[nil]["profit"]
       return true
     end
-    false
+    generateXMLByBuilding x,y
   end
 
   def getFactoryIncome x,y
@@ -132,7 +132,7 @@ class Building
       get_factory_income(x,y)
       return true
     end
-    false
+    generateXMLByBuilding x,y
   end
 
   def getWorkTime contract
@@ -151,20 +151,36 @@ class Building
     end
   end
 
+  def generateXMLByBuilding x,y
+     get_building(x,y) do |result|
+      return generateXMLByRow result
+    end
+  end
+
   def generateXMLByTable
     coins = getCoins
     resultString = "<field coins='#{coins}'>"
-    get_all_buildings do |result|
-      result.each do |r|
-        if (r['type']!="factory")
-          resultString<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
-        else
-          resultString<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
-        end
+     get_all_buildings do |result|
+      resultString<< generateXMLByRow(result)
       end
       resultString<<"</field>"
       resultString
     end
+
+
+  def generateXMLByRow rows
+    result_str=""
+    rows.each do |r|
+      if (r['type']!="factory")
+        result_str<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
+      else
+        result_str<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
+      end
     end
+    result_str
+  end
 end
+
+
+
 

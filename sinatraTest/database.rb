@@ -15,6 +15,10 @@ def get_all_buildings
   yield @@conn.exec("select * from buildings") if block_given?
 end
 
+def get_building x,y
+  yield @@conn.exec("select * from buildings where x=#{x} and y=#{y}") if block_given?
+end
+
 def update_building hash
  @@conn.exec("insert into buildings(type,x,y,contract,time)
                        values('#{hash["type"]}',#{hash["x"]},#{hash["y"]},#{hash["contract"]},'#{hash["time"]}');")

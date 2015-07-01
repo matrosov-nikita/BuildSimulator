@@ -18,19 +18,23 @@ public class Field {
         stage.addChild(field_sprite);
     }
 
-    public function getObject(type: String):Object
+    public function getObjectType(type: String):Object
     {
         var object_types:Object = {auto_workshop: Workshop, factory: Factory};
         return object_types[type]
     }
 
-    public function addBuidling(type:String, x:int,y:int,time:int,contract:int=0):void
+    public function getObject(type:String, x:int,y:int,time:int,contract:int=0):Object
     {
-        var object:Object = getObject(type);
-        buildings.push(new object(x,y,time,contract));
-        buildings[buildings.length-1].draw();
+        var object:Object = getObjectType(type);
+        return new object(x,y,time,contract);
     }
 
+    public function addBuilding(object:Object):void
+    {
+        buildings.push(object);
+        buildings[buildings.length-1].draw();
+    }
 
     public function findBuilding(x:int, y:int):int
     {
@@ -49,13 +53,24 @@ public class Field {
         coins = xmlStr.@coins;
         Global.coins.text = "Coins: " + coins;
         for each(var child:XML in xmlStr.*) {
-            var x:int = child.@x;
-            var y:int = child.@y;
-            var contract:int = child.@contract;
-            var state:String = child.@state;
-            var time:int = getTimeByState(state,contract);
-            addBuidling(child.name(),x,y,time,contract);
+            addBuilding(createBuidlingByXML(child));
         }
+    }
+
+    public function createBuidlingByXML(xml:XML):Object
+    {
+        var x:int = xml.@x;
+        var y:int = xml.@y;
+        var contract:int = xml.@contract;
+        var state:String = xml.@state;
+        var time:int = getTimeByState(state,contract);
+        return getObject(xml.name(),x,y,time,contract);
+    }
+
+    public function reCreateBuiling(index:int, data:XML):void
+    {
+        Global.field.buildings[index].remove(index);
+        Global.field.addBuilding(Global.field.createBuidlingByXML(data));
     }
 
     public function getTimeByState(state:String,contract:int):int
