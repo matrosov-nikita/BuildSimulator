@@ -38,10 +38,8 @@ public class Field {
 
     public function findBuilding(x:int, y:int):int
     {
-        for(var i:int = 0; i < buildings.length; ++i)
-        {
-            if (buildings[i]._x==x && buildings[i]._y==y)
-            {
+        for(var i:int = 0; i < buildings.length; ++i) {
+            if (buildings[i]._x==x && buildings[i]._y==y) {
                 return i;
             }
         }
@@ -82,7 +80,7 @@ public class Field {
                    time=0;break;
             default:
                time = Math.floor(Number(state));
-        }
+            }
         return time;
     }
 }

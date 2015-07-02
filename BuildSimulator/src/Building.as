@@ -3,10 +3,8 @@ import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.net.URLVariables;
-import flash.net.registerClassAlias;
 import flash.text.TextField;
 import flash.text.TextFormat;
-import flash.utils.ByteArray;
 import flash.utils.Timer;
 public class Building {
     public const WIDTH_BUILDING:int=40;
@@ -115,6 +113,7 @@ public class Building {
         redraw();
         sprite.addEventListener(MouseEvent.CLICK, getProfit);
     }
+
     public function getProfit(event:MouseEvent):void
     {
     }

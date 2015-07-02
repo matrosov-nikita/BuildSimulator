@@ -1,14 +1,12 @@
-require 'singleton'
 require_relative 'database'
 require_relative 'conf'
 
-
 class Building
-  include Singleton
-
   @@config=Conf.class_variable_get(:@@contract)
 
-    def existBuilding x,y
+  class << self
+
+    def existBuilding? x,y
       exist do |res|
         res.each do |result|
           return true if result['x']==x.to_s && result['y']==y.to_s
@@ -76,14 +74,14 @@ class Building
       coins=getFactoryCost
     end
     time=Time.now
-    if (!existBuilding(x,y) && checkCoins(coins))
-      update_building({"x"=>x,"y"=>y,"type"=>type,"contract"=>contract,"time"=>time})
+    if (!existBuilding?(x,y) && checkCoins(coins))
+      add_building({"x"=>x,"y"=>y,"type"=>type,"contract"=>contract,"time"=>time})
       decreaseCoins coins
     end
   end
 
   def remove x,y
-    if existBuilding(x,y)
+    if existBuilding?(x,y)
       coins =  getTypeBuilding(x,y)=="factory"?getFactoryCost/2:getShopCost/2
       increaseCoins(coins)
       remove_building(x,y)
@@ -93,7 +91,7 @@ class Building
   end
 
   def move x,y,new_x,new_y
-    if !existBuilding(new_x,new_y)
+    if !existBuilding?(new_x,new_y)
       move_building x,y,new_x,new_y
       return true
     end
@@ -116,7 +114,7 @@ class Building
   end
 
   def getShopIncome x,y
-    if  existBuilding(x,y) && isBuildComplete(x,y)
+    if  existBuilding?(x,y) && isBuildComplete(x,y)
       get_shop_income(x,y)
       increaseCoins @@config[nil]["profit"]
       return true
@@ -179,7 +177,8 @@ class Building
     end
     result_str
   end
-end
+  end
+  end
 
 
 

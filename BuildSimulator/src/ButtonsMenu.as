@@ -1,4 +1,3 @@
-
 package {
 import flash.display.Sprite;
 import flash.display.Stage;
@@ -20,11 +19,8 @@ public class ButtonsMenu {
     public const PATH_REMOVE_BUILDING:String = "http://localhost:4567/removeBuilding";
     var myformat:TextFormat = new TextFormat("Georgia",BUTTON_FONT_SIZE);
     var names_button = ["Shop","Factory","Move","Remove"];
-    var type_cost:Array=[]
-    var btnAddShop:MyButton;
-    var btnAddFactory:MyButton;
-    var btnMove:MyButton;
-    var btnSell:MyButton;
+    var type_cost:Array=[];
+    var btnAddShop,btnAddFactory,btnMove,btnSell:MyButton;
     var buttons:Array = new Array(btnAddShop, btnAddFactory,btnMove,btnSell);
     var listeners:Array = new Array(btnAddShopListener,btnAddFactoryListener,btnMoveListener,btnSellListener);
     var stage:Stage;
@@ -52,24 +48,24 @@ public class ButtonsMenu {
 
     private function btnAddShopListener(event:MouseEvent):void
     {
-            Mouse.hide();
-            var p:String =Global.CURSOR_FOR_SHOP ;
-            cursor =  new CustomCursor(p, Global.field);
-            functiononClick = createBuilding("auto_workshop",type_cost["auto_workshop"]);
-            Global.field.field_sprite.addEventListener(MouseEvent.CLICK, functiononClick);
-            Global.userOperation = true;
+        setAddBuidlingListener("auto_workshop");
     }
 
     private function btnAddFactoryListener(event:MouseEvent):void
     {
-            Mouse.hide();
-            var p:String =Global.CURSOR_FOR_FACTORY ;
-            cursor =  new CustomCursor(p, Global.field);
-            functiononClick = createBuilding("factory",type_cost["factory"]);
-            Global.field.field_sprite.addEventListener(MouseEvent.CLICK, functiononClick);
-            Global.userOperation = true;
+        setAddBuidlingListener("factory");
     }
 
+    private function setAddBuidlingListener(type:String):void
+    {
+        Mouse.hide();
+        var p:String = type=="auto_workshop"?Global.CURSOR_FOR_SHOP:Global.CURSOR_FOR_FACTORY;
+        cursor =  new CustomCursor(p, Global.field);
+        functiononClick = createBuilding(type,type_cost[type]);
+        Global.field.field_sprite.addEventListener(MouseEvent.CLICK, functiononClick);
+        Global.userOperation = true;
+    }
+    
     private function createBuilding(type:String, cost:int):Function
     {
         return function (event:MouseEvent):void {
@@ -77,10 +73,6 @@ public class ButtonsMenu {
             var y:int = Math.floor(stage.mouseY / Global.CELL_SIZE);
             if ( insideField(event.stageX, event.stageY)) {
                 {
-                    Global.field.field_sprite.removeEventListener(MouseEvent.CLICK, functiononClick);
-                    Global.userOperation = false;
-                    Mouse.show();
-                    Global.field.field_sprite.removeChild(cursor);
                     var variables:URLVariables = new URLVariables();
                     variables.y = y;
                     variables.x = x;
@@ -100,11 +92,16 @@ public class ButtonsMenu {
 
     public function  successAdd(x:int,y:int,type:String,cost:int):void
     {
+        Global.field.field_sprite.removeEventListener(MouseEvent.CLICK, functiononClick);
+        Global.userOperation = false;
+        Mouse.show();
+        Global.field.field_sprite.removeChild(cursor);
         var time:int = (type!="factory")?Workshop.TIME_WORKING:0;
         Global.field.addBuilding(Global.field.getObject(type,x,y,time,0));
         Global.coins.text = "Coins: " + ( Global.field.coins -= cost).toString();
         Global. clearErrorField();
     }
+
     public function wrongAdd():void
     {
         var position:int =  Global.field.buildings.length-1;
@@ -142,17 +139,12 @@ public class ButtonsMenu {
             var new_x:Number = Math.floor(stage.mouseX / Global.CELL_SIZE);
             var new_y:Number = Math.floor(stage.mouseY / Global.CELL_SIZE);
             event.currentTarget.stopDrag();
-            Global.field.buildings[index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
-            for (var i:int = 0; i < Global.field.buildings.length; i++) {
-                Global.field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
-            }
             var variables:URLVariables = new URLVariables();
             variables.new_x = new_x;
             variables.new_y = new_y;
             variables.x = _x;
             variables.y = _y;
-            Global.field.buildings[index].move(index, new_x, new_y);
-            Global.clearErrorField();
+            successMove(new_x,new_y);
             HttpHelper.sendRequest(PATH_MOVE_BUILDING, variables, function (data) {
                 if (data != "true") {
                    Global.field.reCreateBuiling(index,XML(data));
@@ -165,6 +157,16 @@ public class ButtonsMenu {
             Global.field.buildings[index].move(index, _x, _y);
             Global.error_field.text = Global.error_array["move"];
         }
+    }
+
+    private function successMove(new_x:int, new_y:int):void
+    {
+        Global.field.buildings[index].sprite.removeEventListener(MouseEvent.MOUSE_UP, up);
+        for (var i:int = 0; i < Global.field.buildings.length; i++) {
+            Global.field.buildings[i].sprite.removeEventListener(MouseEvent.MOUSE_DOWN, downHandler);
+        }
+        Global.field.buildings[index].move(index, new_x, new_y);
+        Global.clearErrorField();
     }
 
     private function btnSellListener(event:MouseEvent):void
@@ -191,6 +193,7 @@ public class ButtonsMenu {
               }
             });
     }
+
     private function wrongRemove(data:String,search_building:int):void
     {
         Global.coins.text = "Coins: " + ( Global.field.coins-=type_cost[Global.field.buildings[search_building].build_type]/2).toString();

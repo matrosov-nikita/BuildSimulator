@@ -22,9 +22,7 @@ public class Workshop extends Building {
     public override  function getProfit(event:MouseEvent):void
     {
         if (Global.userOperation==false) {
-
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
-
             var variables:URLVariables = new URLVariables();
             variables.x = _x;
             variables.y = _y;
@@ -46,7 +44,7 @@ public class Workshop extends Building {
         timer.reset();
         time = TIME_WORKING;
         launchTimer();
-        Global. clearErrorField();
+        Global.clearErrorField();
     }
 
     public override function move(index:int,new_x:int,new_y:int):void
