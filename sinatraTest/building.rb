@@ -2,12 +2,26 @@ require_relative 'database'
 require_relative 'conf'
 
 class Building
-  @@config=Conf.class_variable_get(:@@contract)
-
+  @@contracts=Conf.class_variable_get(:@@contract)
+  @@buildings = Conf.class_variable_get(:@@buildings)
+  @@horizRange = Conf.class_variable_get(:@@horizontalRange)
+  @@verticalRange = Conf.class_variable_get(:@@verticalRange)
   class << self
 
-    def existBuilding? x,y
-      exist do |res|
+    def getAllTypes
+      @@buildings.keys
+    end
+
+    def getHorizontalRange
+      @@horizRange
+    end
+
+    def getVerticalRange
+      @@verticalRange
+    end
+
+    def existBuildingByCoordinates? x, y
+      Database.exist_coordinates do |res|
         res.each do |result|
           return true if result['x']==x.to_s && result['y']==y.to_s
         end
@@ -15,170 +29,179 @@ class Building
       end
     end
 
+    def existBuildingById? id
+      Database.exist_id(id) do |res|
+        return false if res[0]['count'].to_i==0
+      end
+      true
+    end
+
     def getCoins
-       get_coins[0]['coins'].to_i
+      Database.get_coins[0]['coins'].to_i
     end
 
     def checkCoins coins
-       getCoins>=coins
+      getCoins>=coins
     end
 
     def increaseCoins coins
-      increase_coins getCoins,coins
+      Database.increase_coins getCoins, coins
     end
+
     def decreaseCoins coins
-      decrease_coins getCoins,coins
+      Database.decrease_coins getCoins, coins
     end
 
-    def getContract x,y
-      get_contract(x,y)[0]['contract']
+    def getContract id
+      Database.get_contract(id)[0]['contract']
     end
 
-    def existContract x,y
-      (@@config.keys[1]..@@config.keys[2]).include?(getContract(x,y).to_i)
+    def existContract id
+      (@@contracts.keys[1]..@@contracts.keys[2]).include?(getContract(id).to_i)
     end
 
     def getShopCost
-      Conf.class_variable_get(:@@buildings)["auto_workshop"]
+      @@buildings[:auto_workshop]
     end
 
     def getFactoryCost
-      Conf.class_variable_get(:@@buildings)["factory"]
+      @@buildings[:factory]
     end
 
-    def getTypeBuilding x,y
-       get_type(x,y)[0]['type']
+    def getTypeBuilding id
+      Database.get_type(id)[0]['type']
     end
 
     def getCostByContract contract
-      @@config[contract]["cost"]
+      @@contracts[contract][:cost]
     end
 
     def getProfitByContract contract
-      @@config[contract]["profit"]
+      @@contracts[contract][:profit]
     end
 
     def getTimeWorkByContract contract
-      @@config[contract]["time_work"]
+      @@contracts[contract][:time_work]
     end
 
-    def getTime x,y
-      get_time(x,y)[0]['time']
+    def getTime id
+      Database.get_time(id)[0]['time']
     end
 
-  def addBuidling x,y,type
-    contract = 'null'
-    coins=getShopCost
-    if type=="factory"
-      contract = 0
-      coins=getFactoryCost
-    end
-    time=Time.now
-    if (!existBuilding?(x,y) && checkCoins(coins))
-      add_building({"x"=>x,"y"=>y,"type"=>type,"contract"=>contract,"time"=>time})
-      decreaseCoins coins
-    end
-  end
-
-  def remove x,y
-    if existBuilding?(x,y)
-      coins =  getTypeBuilding(x,y)=="factory"?getFactoryCost/2:getShopCost/2
-      increaseCoins(coins)
-      remove_building(x,y)
-      return true
+    def addBuidling x, y, type
+      contract = 'null'
+      coins=getShopCost
+      if type=="factory"
+        contract = 0
+        coins=getFactoryCost
       end
-    generateXMLByBuilding x,y
-  end
-
-  def move x,y,new_x,new_y
-    if !existBuilding?(new_x,new_y)
-      move_building x,y,new_x,new_y
-      return true
+      time=Time.now
+      if (!existBuildingByCoordinates?(x, y) && checkCoins(coins))
+        id = Database.add_building({"x" => x, "y" => y, "type" => type, "contract" => contract, "time" => time})
+        decreaseCoins coins
+        return id[0]["build_id"].to_i
+      end
+      "false"
     end
-    generateXMLByBuilding x,y
-  end
 
-  def startContract x,y,contract
-   cost = getCostByContract(contract.to_i)
-  if  checkCoins(cost) && !existContract(x,y)
-    start_contract(x,y,contract)
-    decreaseCoins cost
-    return true
-  end
-   generateXMLByBuilding x,y
-  end
-
-  def isBuildComplete x,y
-      time = Time.now - Time.parse(getTime(x,y))
-      time+1 >= getWorkTime(getContract(x,y))
-  end
-
-  def getShopIncome x,y
-    if  existBuilding?(x,y) && isBuildComplete(x,y)
-      get_shop_income(x,y)
-      increaseCoins @@config[nil]["profit"]
-      return true
+    def remove id
+      if existBuildingById?(id)
+        coins = @@buildings[getTypeBuilding(id).intern]/2
+        increaseCoins(coins)
+        Database.remove_building(id)
+        return true
+      end
+      generateXMLByBuilding id
     end
-    generateXMLByBuilding x,y
-  end
 
-  def getFactoryIncome x,y
-    if existContract(x,y) && isBuildComplete(x,y)
-      contract = getContract(x,y).to_i
-      profit = getProfitByContract(contract)
-      increaseCoins profit
-      get_factory_income(x,y)
-      return true
+    def move id, new_x, new_y
+      if !existBuildingByCoordinates?(new_x, new_y)
+        Database.move_building id, new_x, new_y
+        return true
+      end
+      generateXMLByBuilding id
     end
-    generateXMLByBuilding x,y
-  end
 
-  def getWorkTime contract
-    return @@config[nil]["time_work"] if (contract==nil)
-    getTimeWorkByContract contract.to_i
-  end
-
-
-  def getState building
-    contract = building['contract']
-    return 'stand' if contract == "0"
-    if Time.now - Time.parse(building['time']) < getWorkTime(contract)
-      return (getWorkTime(contract) - (Time.now - Time.parse(building['time'])) ).to_s
-    else
-      'collect'
+    def startContract id, contract
+      cost = getCostByContract(contract.to_i)
+      if checkCoins(cost) && !existContract(id)
+        Database.start_contract(id, contract)
+        decreaseCoins cost
+        return true
+      end
+      generateXMLByBuilding id
     end
-  end
 
-  def generateXMLByBuilding x,y
-     get_building(x,y) do |result|
-      return generateXMLByRow result
+    def isBuildComplete id
+      time = Time.now - Time.parse(getTime(id))
+      time+1 >= getWorkTime(getContract(id))
     end
-  end
 
-  def generateXMLByTable
-    coins = getCoins
-    resultString = "<field coins='#{coins}'>"
-     get_all_buildings do |result|
-      resultString<< generateXMLByRow(result)
+    def getShopIncome id
+      if isBuildComplete(id)
+        Database.get_shop_income(id)
+        increaseCoins @@contracts[nil][:profit]
+        return true
+      end
+      generateXMLByBuilding id
+    end
+
+    def getFactoryIncome id
+      if existContract(id) && isBuildComplete(id)
+        contract = getContract(id).to_i
+        profit = getProfitByContract(contract)
+        increaseCoins profit
+        Database.get_factory_income(id)
+        return true
+      end
+      generateXMLByBuilding id
+    end
+
+    def getWorkTime contract
+      return @@contracts[nil][:time_work] if (contract==nil)
+      getTimeWorkByContract contract.to_i
+    end
+
+    def getState building
+      contract = building['contract']
+      return 'stand' if contract == "0"
+      if Time.now - Time.parse(building['time']) < getWorkTime(contract)
+        return (getWorkTime(contract) - (Time.now - Time.parse(building['time']))).to_s
+      else
+        'collect'
+      end
+    end
+
+    def generateXMLByBuilding id
+      Database.get_building(id.to_i) do |result|
+        return generateXMLByRow result
+      end
+    end
+
+    def generateXMLByTable
+      coins = getCoins
+      resultString = "<field coins='#{coins}'>"
+      Database.get_all_buildings do |result|
+        resultString<< generateXMLByRow(result)
       end
       resultString<<"</field>"
       resultString
     end
 
 
-  def generateXMLByRow rows
-    result_str=""
-    rows.each do |r|
-      if (r['type']!="factory")
-        result_str<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
-      else
-        result_str<<"<#{r["type"]} x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
+    def generateXMLByRow rows
+      result_str=""
+      rows.each do |r|
+        if (r['type']!="factory")
+          result_str<<"<#{r["type"]} id='#{r["build_id"]}' x='#{r["x"]}' y='#{r["y"]}' state='#{getState(r)}'/>"
+        else
+          result_str<<"<#{r["type"]} id='#{r["build_id"]}' x='#{r["x"]}' y='#{r["y"]}' contract='#{r["contract"]}' state='#{getState(r)}'/>"
+        end
       end
+      result_str
     end
-    result_str
   end
-  end
-  end
+end
 
 
 

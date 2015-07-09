@@ -26,18 +26,18 @@ public class Factory extends Building {
     var contract_sprite:Sprite;
     var visible_contract:Boolean = false;
 
-    public function Factory(_x:Number, _y:Number,time:int, contract:int)
+    public function Factory(id:Number, _x:Number, _y:Number,time:int, contract:int)
     {
-        super(_x, _y,time, contract);
+        super(id, _x, _y,time, contract);
         path=Global.PATH_FACTORY;
         build_type="factory";
         this.contract = contract;
         if (contract==0) {
             sprite.addEventListener(MouseEvent.CLICK, chooseContract);
         }
-        timer = new Timer(Global.TIME_TICK);
+        timer = new Timer(Global.TIME_DELAY);
         launchTimer();
-        timer.addEventListener(TimerEvent.TIMER, tick);
+        timer.addEventListener(TimerEvent.TIMER, timerHandler);
         timer.addEventListener(TimerEvent.TIMER_COMPLETE, ready);
         CONTRACTS[1] ={profit:30,cost:5,time_work:300};
         CONTRACTS[2] = {profit:50,cost:10, time_work:900};
@@ -55,12 +55,11 @@ public class Factory extends Building {
         if (Global.userOperation==false) {
             sprite.removeEventListener(MouseEvent.CLICK, getProfit);
             var variables:URLVariables = new URLVariables();
-            variables.x = _x;
-            variables.y = _y;
+            variables.id = id;
             successGetProfit();
             HttpHelper.sendRequest(PATH_GET_FACTORY_INCOME, variables,function(data) {
                 if (data!="true") {
-                    Global.field.reCreateBuiling(Global.field.findBuilding(_x,_y),XML(data));
+                    Global.field.reсreateBuilding(Global.field.findBuilding(_x,_y),XML(data));
                     Global.coins.text = "Coins: " + ( Global.field.coins-=CONTRACTS[XML(data).@contract]["profit"]).toString();
                     Global.error_field.text = Global.error_array["profitFactory"];
                 }
@@ -122,12 +121,11 @@ public class Factory extends Building {
     {
         var variables:URLVariables = new URLVariables();
         variables.contract=number;
-        variables.x = _x;
-        variables.y=_y;
+        variables.id = id;
         successStartContract(number);
         HttpHelper.sendRequest(PATH_START_CONTRACT, variables,function(data) {
             if (data!="true") {
-                Global.field.reCreateBuiling(Global.field.findBuilding(_x,_y),XML(data));
+                Global.field.reсreateBuilding(Global.field.findBuilding(_x,_y),XML(data));
                 Global.error_field.text = Global.error_array["startContract"];
                 Global.coins.text = "Coins: " + ( Global.field.coins += CONTRACTS[number]["cost"]).toString();
             }

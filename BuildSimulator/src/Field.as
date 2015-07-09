@@ -24,10 +24,10 @@ public class Field {
         return object_types[type]
     }
 
-    public function getObject(type:String, x:int,y:int,time:int,contract:int=0):Object
+    public function getObject(id:int, type:String, x:int,y:int,time:int,contract:int=0):Object
     {
         var object:Object = getObjectType(type);
-        return new object(x,y,time,contract);
+        return new object(id,x,y,time,contract);
     }
 
     public function addBuilding(object:Object):void
@@ -51,24 +51,25 @@ public class Field {
         coins = xmlStr.@coins;
         Global.coins.text = "Coins: " + coins;
         for each(var child:XML in xmlStr.*) {
-            addBuilding(createBuidlingByXML(child));
+            addBuilding(createBuildingByXML(child));
         }
     }
 
-    public function createBuidlingByXML(xml:XML):Object
+    public function createBuildingByXML(xml:XML):Object
     {
+        var id:int = xml.@id;
         var x:int = xml.@x;
         var y:int = xml.@y;
         var contract:int = xml.@contract;
         var state:String = xml.@state;
         var time:int = getTimeByState(state,contract);
-        return getObject(xml.name(),x,y,time,contract);
+        return getObject(id,xml.name(),x,y,time,contract);
     }
 
-    public function reCreateBuiling(index:int, data:XML):void
+    public function reсreateBuilding(index:int, data:XML):void
     {
-        Global.field.buildings[index].remove(index);
-        Global.field.addBuilding(Global.field.createBuidlingByXML(data));
+        buildings[index].remove(index);
+        addBuilding(createBuildingByXML(data));
     }
 
     public function getTimeByState(state:String,contract:int):int

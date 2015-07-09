@@ -7,7 +7,7 @@ public class Global {
     public static var userOperation:Boolean;
     public static var coins:TextField = new TextField();
     public static var error_field:TextField = new TextField();
-    public static const TIME_TICK:int=1000;
+    public static const TIME_DELAY:int=1000;
     public static const CELL_SIZE:int = 50;
     public static const START_COINS:int = 70;
     public static const FIELD_PATH:String = "http://localhost:4567/field.jpg";
